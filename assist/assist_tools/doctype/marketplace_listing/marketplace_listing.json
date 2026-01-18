@@ -1,0 +1,156 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ML-{#####}",
+ "creation": "2026-01-05 17:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "listing_type",
+  "item_code",
+  "asset_code",
+  "marketplace",
+  "title",
+  "description",
+  "price",
+  "currency",
+  "column_break_1",
+  "status",
+  "listing_url",
+  "posted_on",
+  "expires_on",
+  "section_break_2",
+  "images"
+ ],
+ "fields": [
+  {
+   "default": "Sale",
+   "fieldname": "listing_type",
+   "fieldtype": "Select",
+   "label": "Listing Type",
+   "options": "Sale\nRental",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.listing_type=='Sale'",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.listing_type=='Rental'",
+   "fieldname": "asset_code",
+   "fieldtype": "Link",
+   "label": "Asset Code",
+   "options": "Asset"
+  },
+  {
+   "fieldname": "marketplace",
+   "fieldtype": "Select",
+   "label": "Marketplace",
+   "options": "Facebook Marketplace\nFINN.no\nleid.no\nOther Rental Service\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Listing Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "label": "Price",
+   "reqd": 1
+  },
+  {
+   "default": "NOK",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPosted\nSold\nRented\nExpired\nCancelled"
+  },
+  {
+   "fieldname": "listing_url",
+   "fieldtype": "Data",
+   "label": "Listing URL"
+  },
+  {
+   "fieldname": "posted_on",
+   "fieldtype": "Datetime",
+   "label": "Posted On"
+  },
+  {
+   "fieldname": "expires_on",
+   "fieldtype": "Date",
+   "label": "Expires On"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Images"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Table",
+   "label": "Images",
+   "options": "Marketplace Listing Image"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-05 17:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Marketplace Listing",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

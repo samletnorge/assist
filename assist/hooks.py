@@ -1,9 +1,13 @@
 app_name = "assist"
 app_title = "Assist"
 app_publisher = "sm norge"
-app_description = "An ai assistant to help deal with "
+app_description = "AI-powered tools for extending ERPNext with MCP integration"
 app_email = "kontakt@drivstoffapp.no"
-app_license = "mit"
+app_license = "MIT"
+app_icon = "octicon octicon-tools"
+app_color = "blue"
+app_icon = "octicon octicon-tools"
+app_color = "blue"
 
 # Apps
 # ------------------
