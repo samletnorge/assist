@@ -166,7 +166,7 @@ services:
         condition: on-failure
 
   scheduler:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
