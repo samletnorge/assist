@@ -1,6 +1,6 @@
 services:
   backend:
-    image: custom-erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
@@ -20,7 +20,7 @@ services:
         condition: service_healthy
         
   configurator:
-    image: custom-erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
@@ -164,7 +164,7 @@ services:
         condition: on-failure
 
   scheduler:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
@@ -181,7 +181,7 @@ services:
         condition: service_healthy
 
   websocket:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
