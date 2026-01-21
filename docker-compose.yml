@@ -20,7 +20,7 @@ services:
         condition: service_healthy
         
   configurator:
-    image: frappe/erpnext:latest
+    image: custom-erpnext:latest
     networks:
       - dokploy-network
     deploy:
@@ -71,7 +71,7 @@ services:
       - db-data:/var/lib/mysql
    
   frontend:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     depends_on:
@@ -97,7 +97,7 @@ services:
       - "8080"
 
   queue-long:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
@@ -116,7 +116,7 @@ services:
         condition: service_healthy
 
   queue-short:
-    image: frappe/erpnext:latest
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
