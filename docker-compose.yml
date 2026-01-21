@@ -1,6 +1,6 @@
 services:
   backend:
-    image: frappe/erpnext:latest
+    image: custom-erpnext:latest
     networks:
       - dokploy-network
     deploy:
