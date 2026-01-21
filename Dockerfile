@@ -3,11 +3,9 @@ FROM frappe/erpnext:latest
 
 WORKDIR /home/frappe/frappe-bench
 
-# Clone assist if not already present
-RUN git clone --branch main https://github.com/minfuel/assist.git apps/assist
-
 # Install assist
-RUN bench get-app apps/assist . 
+RUN bench get-app https://github.com/minfuel/assist.git --branch main
+
 
 
 # Copy entrypoint script
