@@ -100,6 +100,8 @@ services:
       - logs:/home/frappe/frappe-bench/logs
     expose:
       - "8080"
+    ports:
+      - 8080
 
   queue-long:
     image: custom-erpnext
