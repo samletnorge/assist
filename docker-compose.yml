@@ -164,6 +164,9 @@ services:
         condition: on-failure
 
   scheduler:
+    build:
+        context: .   # path to folder containing Dockerfile
+        dockerfile: Dockerfile  # optional if named Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
