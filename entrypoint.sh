@@ -14,14 +14,6 @@ else
     bench get-app $ASSIST_REPO --branch $ASSIST_BRANCH
 fi
 
-# Install Assist if not installed
-if ! bench --site $SITE_NAME list-apps | grep -q assist; then
-    echo "Installing Assist on site $SITE_NAME..."
-    bench --site $SITE_NAME install-app assist
-fi
-
-# Run migrations
-bench --site $SITE_NAME migrate
 
 # shellcheck disable=SC2016
 envsubst '${BACKEND}
