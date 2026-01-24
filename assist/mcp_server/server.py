@@ -639,6 +639,63 @@ def scan_receipt_and_add_items(
         }
 
 
+# New Tool 4.5: Batch Camera Upload for Stock Items
+@mcp.tool()
+def batch_camera_upload_items(
+    images: List[str],
+    warehouse: str,
+    upload_name: Optional[str] = None,
+    item_group: Optional[str] = None,
+    valuation_rate: Optional[float] = None,
+    remove_background: bool = True,
+    enhance_image: bool = True,
+) -> Dict[str, Any]:
+    """
+    Add multiple items to stock using phone camera in batch mode.
+    Very intuitive for quickly photographing and adding many items at once.
+    Automatically processes images with background removal and enhancement.
+    
+    Args:
+        images: List of base64 encoded image strings from phone camera
+        warehouse: Target warehouse for all items
+        upload_name: Optional descriptive name for this batch upload
+        item_group: Optional item group classification for all items
+        valuation_rate: Optional default valuation rate for all items
+        remove_background: Automatically remove background from all images (default: True)
+        enhance_image: Automatically enhance image quality (default: True)
+    
+    Returns:
+        Dictionary with batch upload results including items created and any failures
+    """
+    try:
+        import frappe
+        import json
+        
+        # Convert images list to JSON string for the API
+        images_json = json.dumps(images) if not isinstance(images, str) else images
+        
+        # Call the quick batch upload function
+        from assist.assist_tools.doctype.stock_camera_upload.stock_camera_upload import quick_batch_upload
+        
+        result = quick_batch_upload(
+            images=images_json,
+            warehouse=warehouse,
+            upload_name=upload_name,
+            item_group=item_group,
+            valuation_rate=valuation_rate,
+            remove_background=remove_background,
+            enhance_image=enhance_image
+        )
+        
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to process batch camera upload"
+        }
+
+
 # New Tool 5: Price Comparison with Prisjakt.no
 @mcp.tool()
 def compare_vendor_prices(

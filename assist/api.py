@@ -720,3 +720,85 @@ def post_rental_listing(
             "error": str(e),
             "message": "Failed to post asset for rental"
         }
+
+
+@frappe.whitelist()
+def camera_batch_upload(
+    images: str,
+    warehouse: str,
+    upload_name: str = None,
+    item_group: str = None,
+    valuation_rate: float = None,
+    remove_background: bool = True,
+    enhance_image: bool = True
+) -> Dict[str, Any]:
+    """
+    Upload multiple items to stock using phone camera images in batch.
+    Very intuitive for quickly adding many items to inventory.
+    
+    Args:
+        images: JSON array of base64 encoded image strings
+        warehouse: Target warehouse for stock items
+        upload_name: Optional name for this batch upload
+        item_group: Optional item group classification
+        valuation_rate: Optional default valuation rate for all items
+        remove_background: Automatically remove background from images
+        enhance_image: Automatically enhance image quality
+    
+    Returns:
+        Dictionary with batch upload results
+    """
+    try:
+        from assist.assist_tools.doctype.stock_camera_upload.stock_camera_upload import quick_batch_upload
+        
+        # Convert string booleans
+        if isinstance(remove_background, str):
+            remove_background = remove_background.lower() == "true"
+        if isinstance(enhance_image, str):
+            enhance_image = enhance_image.lower() == "true"
+        if valuation_rate:
+            valuation_rate = float(valuation_rate)
+        
+        result = quick_batch_upload(
+            images=images,
+            warehouse=warehouse,
+            upload_name=upload_name,
+            item_group=item_group,
+            valuation_rate=valuation_rate,
+            remove_background=remove_background,
+            enhance_image=enhance_image
+        )
+        
+        return result
+    except Exception as e:
+        frappe.log_error(f"Camera batch upload error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to process camera batch upload"
+        }
+
+
+@frappe.whitelist()
+def process_upload_batch(upload_name: str) -> Dict[str, Any]:
+    """
+    Process an existing Stock Camera Upload batch.
+    
+    Args:
+        upload_name: Name of the Stock Camera Upload document
+    
+    Returns:
+        Processing result
+    """
+    try:
+        from assist.assist_tools.doctype.stock_camera_upload.stock_camera_upload import process_batch_upload
+        
+        result = process_batch_upload(upload_name)
+        return result
+    except Exception as e:
+        frappe.log_error(f"Process upload batch error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to process upload batch"
+        }
