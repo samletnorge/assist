@@ -154,7 +154,11 @@ app_color = "blue"
 
 scheduler_events = {
 	"hourly": [
-		"assist.utils.marketplace_hustle.check_marketplace_searches"
+		"assist.tasks.check_bruktdel_searches"
+	],
+	"daily": [
+		"assist.tasks.daily_marketplace_summary",
+    "assist.utils.marketplace_hustle.check_marketplace_searches"
 	],
 }
 

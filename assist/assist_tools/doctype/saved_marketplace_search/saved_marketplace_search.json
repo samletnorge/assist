@@ -11,6 +11,7 @@
   "search_query",
   "marketplace",
   "search_type",
+  "asset_code",
   "column_break_1",
   "active",
   "last_checked",
@@ -34,7 +35,7 @@
    "fieldname": "marketplace",
    "fieldtype": "Select",
    "label": "Marketplace",
-   "options": "Facebook Marketplace\nFINN.no\nOther",
+   "options": "Facebook Marketplace\nFINN.no\nbruktdel.no\nOther",
    "reqd": 1
   },
   {
@@ -43,6 +44,13 @@
    "fieldtype": "Select",
    "label": "Search Type",
    "options": "purchase_request\nmaterial_request"
+  },
+  {
+   "fieldname": "asset_code",
+   "fieldtype": "Link",
+   "label": "Asset (Car/Vehicle)",
+   "options": "Asset",
+   "description": "Link to a car or vehicle asset to track parts for"
   },
   {
    "fieldname": "column_break_1",

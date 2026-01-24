@@ -156,6 +156,7 @@ sequenceDiagram
 - Facebook Marketplace
 - FINN.no (Norway's leading classifieds)
 - leid.no (rental marketplace)
+- bruktdel.no (used car parts) ⭐ NEW!
 - Custom marketplace support
 
 **Features:**
@@ -164,6 +165,7 @@ sequenceDiagram
 - Price suggestion
 - Listing synchronization
 - Phone-control automation
+- **Car Parts Tracking** - Monitor bruktdel.no for new car parts linked to owned vehicle assets
 - **Marketplace Hustle Routine** ⭐ NEW!
   - Automatic monitoring of saved marketplace searches
   - Smart matching with Material Requests and Tasks
@@ -547,6 +549,7 @@ assist/
 ## 📖 Documentation
 
 - **[MIGRATION.md](MIGRATION.md)** - Detailed migration guide from v0
+- **[BRUKTDEL_TRACKING.md](BRUKTDEL_TRACKING.md)** - Guide for tracking car parts on bruktdel.no
 - **[API Documentation](assist/api.py)** - Complete API reference with examples
 - **[Hooks Reference](assist/hooks.py)** - Available hooks and configuration
 
