@@ -450,7 +450,9 @@ The marketplace hustle routine automatically monitors marketplace listings and m
    - Navigate to Assist Tools → Saved Marketplace Search
    - Create a new search with your query (e.g., "byggningsmaterialer", "paller")
    - Select the marketplace (Facebook Marketplace or FINN.no)
-   - Choose search type (material_request or purchase_request)
+   - Choose search type:
+     - **material_request**: Matches against open Material Requests
+     - **purchase_request**: Also matches against open Material Requests
    - Mark as active
 
 2. **The routine automatically:**

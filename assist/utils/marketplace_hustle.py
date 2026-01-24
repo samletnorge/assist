@@ -100,13 +100,14 @@ def process_single_search(search: Dict[str, Any]) -> Dict[str, Any]:
     matches_created = 0
     
     # Check if items match Material Requests or Tasks
+    # Both 'material_request' and 'purchase_request' types should check Material Requests
     for item in new_items:
-        if search.get("search_type") == "material_request":
+        if search.get("search_type") in ("material_request", "purchase_request"):
             # Check against Material Requests
             if match_with_material_requests(item, search["search_query"]):
                 matches_created += 1
         else:
-            # Check against Tasks or general needs
+            # For other types or no type specified, check against Tasks
             if match_with_tasks(item, search["search_query"]):
                 matches_created += 1
     
