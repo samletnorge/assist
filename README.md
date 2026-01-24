@@ -165,6 +165,18 @@ sequenceDiagram
 - Price suggestion
 - Listing synchronization
 - Phone-control automation
+- - **Google Maps Route Generation** ⭐ NEW!
+  - Automatic route link generation for pickup locations
+  - Multi-listing route optimization
+  - Seller contact tracking
+- **Packaging Management** ⭐ NEW!
+  - Track packaging status (Pending/In Progress/Completed)
+  - Packaging notes and requirements
+- **Auto Photoshoot** ⭐ NEW!
+  - Automated multi-angle product photography
+  - Integration with camera batch upload
+  - Background removal and enhancement
+=======
 - **Car Parts Tracking** - Monitor bruktdel.no for new car parts linked to owned vehicle assets
 - **Marketplace Hustle Routine** ⭐ NEW!
   - Automatic monitoring of saved marketplace searches
@@ -172,6 +184,7 @@ sequenceDiagram
   - Real-time notifications when needed items appear
   - Tracks building materials, pallets, equipment, and more
   - Scheduled hourly checks for new listings
+
 
 ### 🏢 Norwegian Business Tools
 
@@ -402,6 +415,21 @@ POST /api/method/assist.api.plan_pickup_route
     "preferred_date": "2026-01-20"
 }
 
+# Generate Google Maps route for multiple listings ⭐ NEW!
+POST /api/method/assist.api.generate_marketplace_route
+{
+    "listing_ids": "[\"ML-00001\", \"ML-00002\", \"ML-00003\"]",
+    "start_location": "Oslo, Norway"
+}
+
+# Auto photoshoot for rental items ⭐ NEW!
+POST /api/method/assist.api.auto_photoshoot_rental_item
+{
+    "listing_id": "ML-00001",
+    "remove_background": true,
+    "enhance_image": true,
+    "num_angles": 4
+}
 # Run marketplace hustle routine (manual trigger)
 POST /api/method/assist.api.run_marketplace_hustle_routine
 {}

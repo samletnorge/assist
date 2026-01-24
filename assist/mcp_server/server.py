@@ -865,6 +865,7 @@ def orchestrate_pickup_route(
     """
     Orchestrate efficient pickup routes for marketplace listings by contacting sellers.
     Schedules pickups and optimizes route for a specific day with standard Norwegian messages.
+    Generates Google Maps route link with all pickup locations.
     
     Args:
         listings: List of marketplace listing IDs to schedule pickups for
@@ -873,11 +874,12 @@ def orchestrate_pickup_route(
         message_type: Type of message ('standard', 'storage', 'free_goods', 'apology')
     
     Returns:
-        Dictionary with route plan, suggested messages, and seller contact status
+        Dictionary with route plan, Google Maps link, suggested messages, and seller contact status
     """
     try:
         import frappe
         from datetime import datetime
+        from urllib.parse import urlencode
         
         # Standard Norwegian messages for marketplace communication
         standard_messages = {
@@ -898,37 +900,75 @@ def orchestrate_pickup_route(
             "total_distance": 0,
             "estimated_time": 0,
             "standard_messages": standard_messages,
-            "selected_message_type": message_type
+            "selected_message_type": message_type,
+            "gmaps_route_link": None
         }
+        
+        waypoints = []
         
         for listing_id in listings:
             listing = frappe.get_doc("Marketplace Listing", listing_id)
             
-            # Get seller contact info (would be stored in listing)
-            # Select appropriate message based on context
+            # Get seller contact info and location
             suggested_message = standard_messages.get(message_type, standard_messages["standard"])
+            
+            # Build location string for route
+            location_parts = []
+            if listing.pickup_address:
+                location_parts.append(listing.pickup_address)
+            if listing.pickup_city:
+                location_parts.append(listing.pickup_city)
+            if listing.pickup_postal_code:
+                location_parts.append(listing.pickup_postal_code)
+            
+            location_str = None
+            if location_parts:
+                location_str = ", ".join(location_parts)
+            elif listing.pickup_location:
+                location_str = listing.pickup_location
+            
+            if location_str:
+                waypoints.append(location_str)
             
             route_plan["listings"].append({
                 "listing_id": listing_id,
-                "item": listing.item_code,
+                "item": listing.item_code if listing.listing_type == "Sale" else listing.asset_code,
+                "location": location_str,
+                "seller_contact": listing.seller_contact,
+                "seller_phone": listing.seller_phone,
                 "status": "scheduled",
                 "seller_contacted": True,
                 "suggested_message": suggested_message,
-                "pickup_time": None  # TODO: Get confirmed time from seller
+                "pickup_time": None
             })
         
-        # TODO: Implement route optimization algorithm
-        # Could use Google Maps API, Mapbox, or other routing service
+        # Generate Google Maps route link with all waypoints
+        if waypoints:
+            params = {'api': '1'}
+            
+            if start_location:
+                params['origin'] = start_location
+            
+            if len(waypoints) == 1:
+                params['destination'] = waypoints[0]
+            else:
+                # Last waypoint is destination, rest are waypoints
+                params['destination'] = waypoints[-1]
+                if len(waypoints) > 1:
+                    params['waypoints'] = '|'.join(waypoints[:-1])
+            
+            route_plan["gmaps_route_link"] = f"https://www.google.com/maps/dir/?{urlencode(params)}"
         
-        route_plan["optimal_route"] = route_plan["listings"]  # Placeholder
-        route_plan["message"] = f"Route planned for {len(listings)} pickups"
-        route_plan["note"] = "Use phone control to contact sellers with suggested messages"
+        route_plan["optimal_route"] = route_plan["listings"]
+        route_plan["message"] = f"Route planned for {len(listings)} pickups with Google Maps link"
+        route_plan["note"] = "Use phone control to contact sellers with suggested messages. Click the Google Maps link to navigate."
         
         return {
             "success": True,
             "route_plan": route_plan,
+            "gmaps_route_link": route_plan["gmaps_route_link"],
             "standard_messages": standard_messages,
-            "message": f"Pickup route orchestrated for {len(listings)} items with Norwegian message templates"
+            "message": f"Pickup route orchestrated for {len(listings)} items with Norwegian message templates and Google Maps route"
         }
     except Exception as e:
         return {

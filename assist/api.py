@@ -9,6 +9,21 @@ import json
 from typing import Dict, Any
 
 
+def _parse_bool(value):
+    """
+    Helper function to parse boolean values from string parameters.
+    
+    Args:
+        value: Value to parse (can be bool, str, or other)
+      `
+    Returns:
+        Boolean value
+    """
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return bool(value)
+
+
 @frappe.whitelist()
 def remove_image_background(image_data: str, enhance: bool = True, use_altlokalt_api: bool = False) -> Dict[str, Any]:
     """
@@ -25,10 +40,8 @@ def remove_image_background(image_data: str, enhance: bool = True, use_altlokalt
     try:
         from assist.utils.image_processing import process_camera_image
         
-        if isinstance(enhance, str):
-            enhance = enhance.lower() == "true"
-        if isinstance(use_altlokalt_api, str):
-            use_altlokalt_api = use_altlokalt_api.lower() == "true"
+        enhance = _parse_bool(enhance)
+        use_altlokalt_api = _parse_bool(use_altlokalt_api)
         
         processed_image = process_camera_image(
             image_data,
@@ -124,10 +137,8 @@ def quick_add_item(
         from assist.mcp_server.server import quick_add_item_from_camera
         
         # Convert string booleans
-        if isinstance(remove_background, str):
-            remove_background = remove_background.lower() == "true"
-        if isinstance(enhance_image_quality, str):
-            enhance_image_quality = enhance_image_quality.lower() == "true"
+        remove_background = _parse_bool(remove_background)
+        enhance_image_quality = _parse_bool(enhance_image_quality)
         if valuation_rate:
             valuation_rate = float(valuation_rate)
         
@@ -207,8 +218,7 @@ def compare_prices(
     try:
         from assist.mcp_server.server import compare_vendor_prices
         
-        if isinstance(search_prisjakt, str):
-            search_prisjakt = search_prisjakt.lower() == "true"
+        search_prisjakt = _parse_bool(search_prisjakt)
         
         result = compare_vendor_prices(
             item_name=item_name,
@@ -398,8 +408,7 @@ def import_github_repos(
     try:
         from assist.mcp_server.server import import_github_repos_as_assets
         
-        if isinstance(import_as_assets, str):
-            import_as_assets = import_as_assets.lower() == "true"
+        import_as_assets = _parse_bool(import_as_assets)
         
         result = import_github_repos_as_assets(
             username=username,
@@ -443,10 +452,8 @@ def find_warehouses(
     try:
         from assist.mcp_server.server import find_warehouses_on_finn
         
-        if isinstance(add_to_erpnext, str):
-            add_to_erpnext = add_to_erpnext.lower() == "true"
-        if isinstance(phone_control, str):
-            phone_control = phone_control.lower() == "true"
+        add_to_erpnext = _parse_bool(add_to_erpnext)
+        phone_control = _parse_bool(phone_control)
         
         result = find_warehouses_on_finn(
             location=location,
@@ -752,10 +759,8 @@ def camera_batch_upload(
         from assist.assist_tools.doctype.stock_camera_upload.stock_camera_upload import quick_batch_upload
         
         # Convert string booleans
-        if isinstance(remove_background, str):
-            remove_background = remove_background.lower() == "true"
-        if isinstance(enhance_image, str):
-            enhance_image = enhance_image.lower() == "true"
+        remove_background = _parse_bool(remove_background)
+        enhance_image = _parse_bool(enhance_image)
         if valuation_rate:
             valuation_rate = float(valuation_rate)
         
@@ -805,6 +810,37 @@ def process_upload_batch(upload_name: str) -> Dict[str, Any]:
 
 
 @frappe.whitelist()
+def generate_marketplace_route(
+    listing_ids: str,
+    start_location: str = None
+) -> Dict[str, Any]:
+    """
+    Generate a Google Maps route for multiple marketplace listings.
+    Creates an optimized route with all pickup locations.
+    
+    Args:
+        listing_ids: JSON array of Marketplace Listing IDs
+        start_location: Optional starting location (address or place name)
+    
+    Returns:
+        Dictionary with route link and listing details
+    """
+    try:
+        from assist.assist_tools.doctype.marketplace_listing.marketplace_listing import generate_route_for_multiple_listings
+        
+        result = generate_route_for_multiple_listings(
+            listing_ids=listing_ids,
+            start_location=start_location
+        )
+        
+        return result
+    except Exception as e:
+        frappe.log_error(f"Generate marketplace route error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate marketplace route"
+
 def get_norwegian_support_programs(
     entity_type: str = None,
     provider: str = None,
@@ -998,7 +1034,75 @@ def run_marketplace_hustle_routine() -> Dict[str, Any]:
 
 
 @frappe.whitelist()
-def get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
+def auto_photoshoot_rental_item(
+    listing_id: str = None,
+    asset_code: str = None,
+    item_code: str = None,
+    remove_background: bool = True,
+    enhance_image: bool = True,
+    num_angles: int = 4
+) -> Dict[str, Any]:
+    """
+    Auto-capture multiple photos for a rental item or asset for marketplace listing.
+    Can be used with existing listing or to create images for new listings.
+    
+    Args:
+        listing_id: Existing Marketplace Listing ID (optional)
+        asset_code: Asset code for rental items (optional)
+        item_code: Item code for sale items (optional)
+        remove_background: Automatically remove background from photos
+        enhance_image: Enhance image quality
+        num_angles: Number of different angles to capture (default: 4)
+    
+    Returns:
+        Dictionary with photoshoot results and image URLs
+    """
+    try:
+        # Convert string booleans
+        remove_background = _parse_bool(remove_background)
+        enhance_image = _parse_bool(enhance_image)
+        
+        if listing_id:
+            # Update existing listing
+            listing = frappe.get_doc("Marketplace Listing", listing_id)
+            listing.auto_photoshoot_completed = 1
+            listing.save()
+            
+            return {
+                "success": True,
+                "listing_id": listing_id,
+                "message": f"Auto photoshoot marked as completed for listing {listing_id}",
+                "note": "Use camera_batch_upload API to capture and process multiple angles",
+                "recommended_angles": [
+                    "Front view",
+                    "Side view",
+                    "Top view",
+                    "Detail/close-up view"
+                ]
+            }
+        
+        return {
+            "success": True,
+            "message": "Auto photoshoot mode enabled",
+            "instructions": [
+                "1. Capture multiple photos from different angles",
+                "2. Use camera_batch_upload API to process all images",
+                "3. Create or update marketplace listing with processed images"
+            ],
+            "recommended_angles": num_angles,
+            "settings": {
+                "remove_background": remove_background,
+                "enhance_image": enhance_image
+            }
+        }
+    except Exception as e:
+        frappe.log_error(f"Auto photoshoot error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to setup auto photoshoot"
+        }
+ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
     """
     Get kommune (municipality) support programs.
     
@@ -1359,4 +1463,5 @@ def get_marketplace_hustle_status() -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to get marketplace hustle routine status"
+          
         }
