@@ -1,0 +1,285 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:program_name",
+ "creation": "2026-01-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_info_section",
+  "program_name",
+  "program_code",
+  "provider",
+  "program_type",
+  "column_break_1",
+  "category",
+  "status",
+  "external_url",
+  "description_section",
+  "short_description",
+  "full_description",
+  "eligibility_section",
+  "eligible_for_private_person",
+  "eligible_for_company",
+  "eligible_for_housing",
+  "eligible_for_farm",
+  "column_break_2",
+  "additional_eligibility_criteria",
+  "financial_section",
+  "support_amount_min",
+  "support_amount_max",
+  "currency",
+  "column_break_3",
+  "percentage_coverage",
+  "max_coverage_amount",
+  "dates_section",
+  "application_deadline",
+  "program_start_date",
+  "program_end_date",
+  "column_break_4",
+  "application_period",
+  "requirements_section",
+  "requirements",
+  "documents_section",
+  "required_documents"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "program_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Program Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "program_code",
+   "fieldtype": "Data",
+   "label": "Program Code",
+   "unique": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Provider",
+   "options": "Enova\nKommune\nSkatteetaten\nHusbanken\nInnovasjon Norge\nNorges Forskningsråd\nLandsbruksdirektoratet\nOther",
+   "reqd": 1
+  },
+  {
+   "default": "Støtte",
+   "fieldname": "program_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Program Type",
+   "options": "Støtte\nFradrag\nLån\nGarantier\nTilskudd",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Energi\nBygg og oppgradering\nKlima og miljø\nInnovasjon\nLandbruk\nNæring\nAnnet"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Active\nInactive\nUpcoming\nExpired",
+   "reqd": 1
+  },
+  {
+   "fieldname": "external_url",
+   "fieldtype": "Data",
+   "label": "External URL"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "short_description",
+   "fieldtype": "Small Text",
+   "label": "Short Description"
+  },
+  {
+   "fieldname": "full_description",
+   "fieldtype": "Text Editor",
+   "label": "Full Description"
+  },
+  {
+   "fieldname": "eligibility_section",
+   "fieldtype": "Section Break",
+   "label": "Eligibility"
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_private_person",
+   "fieldtype": "Check",
+   "label": "Eligible for Private Person"
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_company",
+   "fieldtype": "Check",
+   "label": "Eligible for Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_housing",
+   "fieldtype": "Check",
+   "label": "Eligible for Housing (Bolig)"
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_farm",
+   "fieldtype": "Check",
+   "label": "Eligible for Farm (Gård)"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_eligibility_criteria",
+   "fieldtype": "Text Editor",
+   "label": "Additional Eligibility Criteria"
+  },
+  {
+   "fieldname": "financial_section",
+   "fieldtype": "Section Break",
+   "label": "Financial Information"
+  },
+  {
+   "fieldname": "support_amount_min",
+   "fieldtype": "Currency",
+   "label": "Support Amount (Min)"
+  },
+  {
+   "fieldname": "support_amount_max",
+   "fieldtype": "Currency",
+   "label": "Support Amount (Max)"
+  },
+  {
+   "default": "NOK",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Percentage of project costs covered",
+   "fieldname": "percentage_coverage",
+   "fieldtype": "Percent",
+   "label": "Percentage Coverage"
+  },
+  {
+   "fieldname": "max_coverage_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Coverage Amount"
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break",
+   "label": "Important Dates"
+  },
+  {
+   "fieldname": "application_deadline",
+   "fieldtype": "Date",
+   "label": "Application Deadline"
+  },
+  {
+   "fieldname": "program_start_date",
+   "fieldtype": "Date",
+   "label": "Program Start Date"
+  },
+  {
+   "fieldname": "program_end_date",
+   "fieldtype": "Date",
+   "label": "Program End Date"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "application_period",
+   "fieldtype": "Data",
+   "label": "Application Period"
+  },
+  {
+   "fieldname": "requirements_section",
+   "fieldtype": "Section Break",
+   "label": "Requirements"
+  },
+  {
+   "fieldname": "requirements",
+   "fieldtype": "Table",
+   "label": "Requirements",
+   "options": "Norwegian Support Program Requirement"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Required Documents"
+  },
+  {
+   "fieldname": "required_documents",
+   "fieldtype": "Table",
+   "label": "Required Documents",
+   "options": "Norwegian Support Program Document"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Norwegian Support Program",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
