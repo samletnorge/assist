@@ -162,6 +162,10 @@ def match_with_material_requests(item: Dict[str, Any], search_query: str) -> boo
         True if a match is found and notification created, False otherwise
     """
     try:
+        # Sanitize search query to prevent SQL injection
+        # Remove any SQL special characters and wildcards that could be exploited
+        sanitized_query = search_query.replace("%", "\\%").replace("_", "\\_")
+        
         # Get open Material Requests with items matching the search query
         material_requests = frappe.db.sql("""
             SELECT 
@@ -184,7 +188,7 @@ def match_with_material_requests(item: Dict[str, Any], search_query: str) -> boo
                     OR mri.item_code LIKE %(search_pattern)s
                 )
         """, {
-            "search_pattern": f"%{search_query}%"
+            "search_pattern": f"%{sanitized_query}%"
         }, as_dict=True)
         
         if material_requests:
@@ -217,6 +221,10 @@ def match_with_tasks(item: Dict[str, Any], search_query: str) -> bool:
         True if a match is found and notification created, False otherwise
     """
     try:
+        # Sanitize search query to prevent SQL injection
+        # Remove any SQL special characters and wildcards that could be exploited
+        sanitized_query = search_query.replace("%", "\\%").replace("_", "\\_")
+        
         # Get open Tasks with descriptions matching the search query
         tasks = frappe.db.sql("""
             SELECT 
@@ -233,7 +241,7 @@ def match_with_tasks(item: Dict[str, Any], search_query: str) -> bool:
                     OR description LIKE %(search_pattern)s
                 )
         """, {
-            "search_pattern": f"%{search_query}%"
+            "search_pattern": f"%{sanitized_query}%"
         }, as_dict=True)
         
         if tasks:
