@@ -1029,3 +1029,111 @@ def search_support_programs(search_term: str, status: str = "Active") -> Dict[st
             "error": str(e),
             "message": "Failed to search support programs"
         }
+
+
+@frappe.whitelist()
+def get_kommune_newsletters(
+    kommune: str = None,
+    is_highlighted: bool = None,
+    category: str = None,
+    status: str = "Published",
+    limit: int = 20
+) -> Dict[str, Any]:
+    """
+    Get kommune newsletter articles and announcements.
+    
+    Args:
+        kommune: Filter by specific kommune name (optional)
+        is_highlighted: Filter by highlighted status (optional)
+        category: Filter by category (optional)
+        status: Filter by status (default: "Published")
+        limit: Maximum number of articles to return (default: 20)
+    
+    Returns:
+        Dictionary with list of newsletter articles
+    """
+    try:
+        filters = {"status": status}
+        
+        if kommune:
+            filters["kommune"] = kommune
+        if is_highlighted is not None:
+            if isinstance(is_highlighted, str):
+                is_highlighted = is_highlighted.lower() == "true"
+            filters["is_highlighted"] = 1 if is_highlighted else 0
+        if category:
+            filters["category"] = category
+        
+        newsletters = frappe.get_all(
+            "Kommune Newsletter",
+            filters=filters,
+            fields=[
+                "name", "kommune", "newsletter_date", "title", "summary",
+                "category", "is_highlighted", "source_url", "tags"
+            ],
+            order_by="newsletter_date desc, is_highlighted desc",
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "newsletters": newsletters,
+            "count": len(newsletters),
+            "filters_applied": filters,
+            "message": f"Found {len(newsletters)} newsletter articles"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune newsletters error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune newsletters"
+        }
+
+
+@frappe.whitelist()
+def get_highlighted_kommune_news(kommune: str = None, limit: int = 10) -> Dict[str, Any]:
+    """
+    Get highlighted kommune news articles.
+    
+    Args:
+        kommune: Optional specific kommune name
+        limit: Maximum number of articles to return (default: 10)
+    
+    Returns:
+        Dictionary with list of highlighted news articles
+    """
+    try:
+        filters = {
+            "is_highlighted": 1,
+            "status": "Published"
+        }
+        
+        if kommune:
+            filters["kommune"] = kommune
+        
+        newsletters = frappe.get_all(
+            "Kommune Newsletter",
+            filters=filters,
+            fields=[
+                "name", "kommune", "newsletter_date", "title", "summary",
+                "category", "source_url", "tags", "full_content"
+            ],
+            order_by="newsletter_date desc",
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "newsletters": newsletters,
+            "count": len(newsletters),
+            "kommune": kommune or "All",
+            "message": f"Found {len(newsletters)} highlighted news articles"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get highlighted news error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve highlighted news"
+        }

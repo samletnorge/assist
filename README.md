@@ -183,6 +183,19 @@ sequenceDiagram
   - Property upgrade requests
   - Renovation permits
 
+- **Norwegian Support Programs Index** ⭐ NEW!
+  - Comprehensive database of grants and deductions (støtte og fradrag)
+  - Support for private persons, companies, housing, and farms
+  - Enova støtte programs (energy efficiency, solar, heat pumps)
+  - Kommune support and building permits (byggesøknad)
+  - Tax deductions from Skatteetaten (BSU, etc.)
+  - Husbanken loans and grants
+  - Innovasjon Norge business support
+  - Agricultural support from Landsbruksdirektoratet
+  - Kommune newsletter tracking with highlighted news
+  - Search and filter by entity type, provider, category
+  - Detailed requirements and document lists
+
 ### 🤖 MCP Server (AI Integration)
 
 The MCP server exposes ERPNext operations to AI models:
@@ -398,6 +411,31 @@ POST /api/method/assist.api.interact_with_skatteetaten
     "action": "employee_registration",
     "data": "{...}"
 }
+
+# Get Norwegian support programs
+POST /api/method/assist.api.get_norwegian_support_programs
+{
+    "entity_type": "private_person",  # or "company", "housing", "farm"
+    "provider": "Enova",
+    "category": "Energi"
+}
+
+# Get Enova support programs
+POST /api/method/assist.api.get_enova_support_programs
+{}
+
+# Search support programs
+POST /api/method/assist.api.search_support_programs
+{
+    "search_term": "varmepumpe"
+}
+
+# Get kommune newsletters
+POST /api/method/assist.api.get_kommune_newsletters
+{
+    "kommune": "Oslo",
+    "is_highlighted": true
+}
 ```
 
 See [assist/api.py](assist/api.py) for complete endpoint documentation.
@@ -505,6 +543,8 @@ assist/
 ## 📖 Documentation
 
 - **[MIGRATION.md](MIGRATION.md)** - Detailed migration guide from v0
+- **[NORWEGIAN_SUPPORT_PROGRAMS.md](NORWEGIAN_SUPPORT_PROGRAMS.md)** - Norwegian support programs and grants index
+- **[STANDARDS_TOOLS.md](STANDARDS_TOOLS.md)** - RDS 81346 and S1000D technical standards
 - **[API Documentation](assist/api.py)** - Complete API reference with examples
 - **[Hooks Reference](assist/hooks.py)** - Available hooks and configuration
 
