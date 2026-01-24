@@ -152,23 +152,14 @@ app_color = "blue"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"assist.tasks.all"
-# 	],
-# 	"daily": [
-# 		"assist.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"assist.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"assist.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"assist.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"hourly": [
+		"assist.tasks.check_bruktdel_searches"
+	],
+	"daily": [
+		"assist.tasks.daily_marketplace_summary"
+	],
+}
 
 # Testing
 # -------
