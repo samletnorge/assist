@@ -802,3 +802,230 @@ def process_upload_batch(upload_name: str) -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to process upload batch"
         }
+
+
+@frappe.whitelist()
+def get_norwegian_support_programs(
+    entity_type: str = None,
+    provider: str = None,
+    program_type: str = None,
+    category: str = None,
+    status: str = "Active"
+) -> Dict[str, Any]:
+    """
+    Get list of Norwegian support programs (støtte og fradrag).
+    
+    Args:
+        entity_type: Filter by eligibility - "private_person", "company", "housing", "farm"
+        provider: Filter by provider (e.g., "Enova", "Kommune", "Skatteetaten")
+        program_type: Filter by type - "Støtte", "Fradrag", "Lån", "Garantier", "Tilskudd"
+        category: Filter by category (e.g., "Energi", "Bygg og oppgradering")
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of matching support programs
+    """
+    try:
+        filters = {}
+        
+        if status:
+            filters["status"] = status
+        if provider:
+            filters["provider"] = provider
+        if program_type:
+            filters["program_type"] = program_type
+        if category:
+            filters["category"] = category
+        
+        # Add entity type filter if specified
+        if entity_type:
+            entity_field_map = {
+                "private_person": "eligible_for_private_person",
+                "company": "eligible_for_company",
+                "housing": "eligible_for_housing",
+                "farm": "eligible_for_farm"
+            }
+            if entity_type in entity_field_map:
+                filters[entity_field_map[entity_type]] = 1
+        
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters=filters,
+            fields=[
+                "name", "program_name", "program_code", "provider", "program_type",
+                "category", "status", "short_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "percentage_coverage", "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+        )
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "filters_applied": filters,
+            "message": f"Found {len(programs)} support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get support programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve support programs"
+        }
+
+
+@frappe.whitelist()
+def get_enova_support_programs(status: str = "Active") -> Dict[str, Any]:
+    """
+    Get all Enova support programs (Enova støtte).
+    
+    Args:
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of Enova support programs
+    """
+    try:
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters={
+                "provider": "Enova",
+                "status": status
+            },
+            fields=[
+                "name", "program_name", "program_code", "program_type",
+                "category", "short_description", "full_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "percentage_coverage", "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+        )
+        
+        # Get detailed information for each program
+        detailed_programs = []
+        for prog in programs:
+            program_doc = frappe.get_doc("Norwegian Support Program", prog.name)
+            prog_dict = prog.as_dict()
+            prog_dict["requirements"] = [r.as_dict() for r in program_doc.requirements]
+            prog_dict["required_documents"] = [d.as_dict() for d in program_doc.required_documents]
+            detailed_programs.append(prog_dict)
+        
+        return {
+            "success": True,
+            "programs": detailed_programs,
+            "count": len(detailed_programs),
+            "provider": "Enova",
+            "message": f"Found {len(detailed_programs)} Enova support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get Enova programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve Enova programs"
+        }
+
+
+@frappe.whitelist()
+def get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
+    """
+    Get kommune (municipality) support programs.
+    
+    Args:
+        kommune: Optional specific kommune name
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of kommune support programs
+    """
+    try:
+        filters = {
+            "provider": "Kommune",
+            "status": status
+        }
+        
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters=filters,
+            fields=[
+                "name", "program_name", "program_code", "program_type",
+                "category", "short_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+        )
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "provider": "Kommune",
+            "message": f"Found {len(programs)} kommune support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune programs"
+        }
+
+
+@frappe.whitelist()
+def search_support_programs(search_term: str, status: str = "Active") -> Dict[str, Any]:
+    """
+    Search Norwegian support programs by keyword.
+    
+    Args:
+        search_term: Keyword to search in program name and description
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of matching support programs
+    """
+    try:
+        # Search in program name and descriptions
+        programs = frappe.db.sql("""
+            SELECT 
+                name, program_name, program_code, provider, program_type,
+                category, status, short_description, external_url,
+                support_amount_min, support_amount_max, currency,
+                eligible_for_private_person, eligible_for_company,
+                eligible_for_housing, eligible_for_farm
+            FROM `tabNorwegian Support Program`
+            WHERE status = %(status)s
+            AND (
+                program_name LIKE %(search)s
+                OR short_description LIKE %(search)s
+                OR full_description LIKE %(search)s
+                OR category LIKE %(search)s
+            )
+            ORDER BY program_name
+        """, {
+            "status": status,
+            "search": f"%{search_term}%"
+        }, as_dict=True)
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "search_term": search_term,
+            "message": f"Found {len(programs)} matching programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Search support programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to search support programs"
+        }
