@@ -162,11 +162,8 @@ def match_with_material_requests(item: Dict[str, Any], search_query: str) -> boo
         True if a match is found and notification created, False otherwise
     """
     try:
-        # Sanitize search query to prevent SQL injection
-        # Remove any SQL special characters and wildcards that could be exploited
-        sanitized_query = search_query.replace("%", "\\%").replace("_", "\\_")
-        
         # Get open Material Requests with items matching the search query
+        # Using parameterized queries which provides SQL injection protection
         material_requests = frappe.db.sql("""
             SELECT 
                 mr.name as material_request,
@@ -188,7 +185,7 @@ def match_with_material_requests(item: Dict[str, Any], search_query: str) -> boo
                     OR mri.item_code LIKE %(search_pattern)s
                 )
         """, {
-            "search_pattern": f"%{sanitized_query}%"
+            "search_pattern": f"%{search_query}%"
         }, as_dict=True)
         
         if material_requests:
@@ -221,11 +218,8 @@ def match_with_tasks(item: Dict[str, Any], search_query: str) -> bool:
         True if a match is found and notification created, False otherwise
     """
     try:
-        # Sanitize search query to prevent SQL injection
-        # Remove any SQL special characters and wildcards that could be exploited
-        sanitized_query = search_query.replace("%", "\\%").replace("_", "\\_")
-        
         # Get open Tasks with descriptions matching the search query
+        # Using parameterized queries which provides SQL injection protection
         tasks = frappe.db.sql("""
             SELECT 
                 name,
@@ -241,7 +235,7 @@ def match_with_tasks(item: Dict[str, Any], search_query: str) -> bool:
                     OR description LIKE %(search_pattern)s
                 )
         """, {
-            "search_pattern": f"%{sanitized_query}%"
+            "search_pattern": f"%{search_query}%"
         }, as_dict=True)
         
         if tasks:
@@ -278,12 +272,13 @@ def create_match_notification(
         match_type: Type of match ('material_request' or 'task')
     """
     try:
-        # Create a comment on the matched document
-        item_title = item.get("title", "Unknown Item")
-        item_price = item.get("price", "N/A")
+        # Get values from item and sanitize them to prevent XSS
+        item_title = frappe.utils.escape_html(item.get("title", "Unknown Item"))
+        item_price = frappe.utils.escape_html(str(item.get("price", "N/A")))
         item_url = item.get("url", "")
-        marketplace = item.get("marketplace", "Unknown")
+        marketplace = frappe.utils.escape_html(item.get("marketplace", "Unknown"))
         
+        # Build comment text with sanitized values
         comment_text = f"""
 <b>Marketplace Match Found!</b><br>
 A matching item was found on {marketplace}:<br>
@@ -292,8 +287,16 @@ A matching item was found on {marketplace}:<br>
 <b>Price:</b> {item_price}<br>
 """
         
+        # Validate and sanitize URL before adding to HTML
         if item_url:
-            comment_text += f'<b>URL:</b> <a href="{item_url}" target="_blank">{item_url}</a><br>'
+            # Basic URL validation - check if it starts with http:// or https://
+            if item_url.startswith("http://") or item_url.startswith("https://"):
+                # Escape URL for HTML context
+                safe_url = frappe.utils.escape_html(item_url)
+                comment_text += f'<b>URL:</b> <a href="{safe_url}" target="_blank">{safe_url}</a><br>'
+            else:
+                # Don't include potentially malicious URLs
+                comment_text += f'<b>URL:</b> [Invalid URL format]<br>'
         
         comment_text += f"<br><i>Found by marketplace hustle routine at {frappe.utils.now()}</i>"
         
