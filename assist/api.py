@@ -840,7 +840,10 @@ def generate_marketplace_route(
             "success": False,
             "error": str(e),
             "message": "Failed to generate marketplace route"
+        }
 
+
+@frappe.whitelist()
 def get_norwegian_support_programs(
     entity_type: str = None,
     provider: str = None,
@@ -965,6 +968,10 @@ def get_enova_support_programs(status: str = "Active") -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve Enova programs"
+        }
+
+
+@frappe.whitelist()
 def save_bruktdel_search(search_query: str, asset_code: str = None, active: bool = True) -> Dict[str, Any]:
     """
     Save a new bruktdel.no search for tracking car parts.
@@ -1102,7 +1109,10 @@ def auto_photoshoot_rental_item(
             "error": str(e),
             "message": "Failed to setup auto photoshoot"
         }
-ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
+
+
+@frappe.whitelist()
+def get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
     """
     Get kommune (municipality) support programs.
     
@@ -1131,6 +1141,25 @@ ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> 
                 "eligible_for_housing", "eligible_for_farm"
             ],
             order_by="program_name"
+        )
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "kommune": kommune or "All",
+            "message": f"Found {len(programs)} kommune programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune programs"
+        }
+
+
+@frappe.whitelist()
 def get_car_assets() -> Dict[str, Any]:
     """
     Get all car/vehicle assets from the system.
@@ -1154,21 +1183,11 @@ def get_car_assets() -> Dict[str, Any]:
                 "status": ["in", ["In Use", "Partially Depreciated", "Fully Depreciated"]]
             },
             fields=["name", "asset_name", "asset_category", "item_name", "status"],
-            order_by="asset_name asc")
+            order_by="asset_name asc"
+        )
         
         return {
             "success": True,
-            "programs": programs,
-            "count": len(programs),
-            "provider": "Kommune",
-            "message": f"Found {len(programs)} kommune support programs"
-        }
-    except Exception as e:
-        frappe.log_error(f"Get kommune programs error: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Failed to retrieve kommune programs"
             "assets": assets,
             "count": len(assets)
         }
@@ -1178,9 +1197,7 @@ def get_car_assets() -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to get car assets"
-        
         }
-        
 
 
 @frappe.whitelist()
