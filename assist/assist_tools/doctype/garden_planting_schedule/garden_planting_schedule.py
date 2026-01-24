@@ -38,10 +38,14 @@ class GardenPlantingSchedule(Document):
             if crop_doc.bad_companions:
                 bad_companions_list = [c.strip() for c in crop_doc.bad_companions.split(',')]
                 for bad_companion in bad_companions_list:
-                    if bad_companion in planted_crops:
-                        warnings.append(
-                            f"Warning: {crop_name} and {bad_companion} are incompatible companions"
-                        )
+                    # Check both exact match and substring match for flexibility
+                    for planted_crop_name in planted_crops.keys():
+                        if (bad_companion == planted_crop_name or 
+                            bad_companion.lower() in planted_crop_name.lower()):
+                            warnings.append(
+                                f"Warning: {crop_name} and {planted_crop_name} are incompatible companions"
+                            )
+                            break
         
         if warnings:
             frappe.msgprint(

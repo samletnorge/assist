@@ -234,27 +234,41 @@ def send_reminder_email(schedule, reminders):
         reminders: List of reminder dictionaries
     """
     try:
-        # Build email content
+        from frappe.utils import cstr
+        
+        # Build email content with proper HTML escaping
         planting_reminders = [r for r in reminders if r["type"] == "planting"]
         harvest_reminders = [r for r in reminders if r["type"] == "harvest"]
         
+        # Escape HTML in user-provided data
+        schedule_name = frappe.utils.html_escape(cstr(schedule.schedule_name))
+        garden_plot = frappe.utils.html_escape(cstr(schedule.garden_plot))
+        
         message = f"""
-        <h2>Garden Planting Reminders for {schedule.schedule_name}</h2>
-        <p>Garden Plot: {schedule.garden_plot}</p>
+        <h2>Garden Planting Reminders for {schedule_name}</h2>
+        <p>Garden Plot: {garden_plot}</p>
         """
         
         if planting_reminders:
             message += "<h3>Upcoming Planting Tasks</h3><ul>"
             for reminder in planting_reminders:
-                variety_text = f" ({reminder['variety']})" if reminder.get('variety') else ""
-                message += f"<li><strong>{reminder['crop']}{variety_text}</strong> - Plant in {reminder['days_until']} days ({reminder['date']})</li>"
+                crop = frappe.utils.html_escape(cstr(reminder['crop']))
+                variety = frappe.utils.html_escape(cstr(reminder.get('variety', '')))
+                variety_text = f" ({variety})" if variety else ""
+                days_until = int(reminder['days_until'])
+                date = cstr(reminder['date'])
+                message += f"<li><strong>{crop}{variety_text}</strong> - Plant in {days_until} days ({date})</li>"
             message += "</ul>"
         
         if harvest_reminders:
             message += "<h3>Upcoming Harvest Tasks</h3><ul>"
             for reminder in harvest_reminders:
-                variety_text = f" ({reminder['variety']})" if reminder.get('variety') else ""
-                message += f"<li><strong>{reminder['crop']}{variety_text}</strong> - Ready to harvest in {reminder['days_until']} days ({reminder['date']})</li>"
+                crop = frappe.utils.html_escape(cstr(reminder['crop']))
+                variety = frappe.utils.html_escape(cstr(reminder.get('variety', '')))
+                variety_text = f" ({variety})" if variety else ""
+                days_until = int(reminder['days_until'])
+                date = cstr(reminder['date'])
+                message += f"<li><strong>{crop}{variety_text}</strong> - Ready to harvest in {days_until} days ({date})</li>"
             message += "</ul>"
         
         message += """

@@ -17,7 +17,12 @@ class Crop(Document):
             start_idx = months.index(self.planting_start_month) if self.planting_start_month in months else -1
             end_idx = months.index(self.planting_end_month) if self.planting_end_month in months else -1
             
-            if start_idx > end_idx and end_idx != -1:
+            # Check for invalid months
+            if start_idx == -1 or end_idx == -1:
+                frappe.throw("Invalid planting month specified")
+            
+            # Check if end is before start (may indicate year spanning)
+            if start_idx > end_idx:
                 frappe.msgprint(
                     "Planting end month is before start month. This may indicate a season that spans the new year.",
                     indicator="orange"

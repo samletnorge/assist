@@ -1506,11 +1506,7 @@ def get_planting_calendar(norwegian_zone: str = None, month: str = None) -> Dict
         if norwegian_zone and norwegian_zone != "All Zones":
             filters["norwegian_zone"] = ["in", [norwegian_zone, "All Zones"]]
         
-        if month:
-            # Get crops where planting period includes this month
-            filters["planting_start_month"] = ["<=", month]
-            filters["planting_end_month"] = [">=", month]
-        
+        # Get all crops first, then filter by month in Python for proper month handling
         crops = frappe.get_all(
             "Crop",
             filters=filters,
@@ -1524,6 +1520,30 @@ def get_planting_calendar(norwegian_zone: str = None, month: str = None) -> Dict
             ],
             order_by="crop_name"
         )
+        
+        # Filter by month if provided (using proper month ordering)
+        if month:
+            months = ["January", "February", "March", "April", "May", "June",
+                     "July", "August", "September", "October", "November", "December"]
+            try:
+                month_idx = months.index(month)
+                filtered_crops = []
+                for crop in crops:
+                    if crop.get("planting_start_month") and crop.get("planting_end_month"):
+                        start_idx = months.index(crop["planting_start_month"])
+                        end_idx = months.index(crop["planting_end_month"])
+                        # Handle year-spanning seasons
+                        if start_idx <= end_idx:
+                            # Normal season within same year
+                            if start_idx <= month_idx <= end_idx:
+                                filtered_crops.append(crop)
+                        else:
+                            # Season spans new year
+                            if month_idx >= start_idx or month_idx <= end_idx:
+                                filtered_crops.append(crop)
+                crops = filtered_crops
+            except ValueError:
+                pass  # Invalid month, return all crops
         
         return {
             "success": True,
