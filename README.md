@@ -156,6 +156,7 @@ sequenceDiagram
 - Facebook Marketplace
 - FINN.no (Norway's leading classifieds)
 - leid.no (rental marketplace)
+- bruktdel.no (used car parts) ⭐ NEW!
 - Custom marketplace support
 
 **Features:**
@@ -164,6 +165,13 @@ sequenceDiagram
 - Price suggestion
 - Listing synchronization
 - Phone-control automation
+- **Car Parts Tracking** - Monitor bruktdel.no for new car parts linked to owned vehicle assets
+- **Marketplace Hustle Routine** ⭐ NEW!
+  - Automatic monitoring of saved marketplace searches
+  - Smart matching with Material Requests and Tasks
+  - Real-time notifications when needed items appear
+  - Tracks building materials, pallets, equipment, and more
+  - Scheduled hourly checks for new listings
 
 ### 🏢 Norwegian Business Tools
 
@@ -393,6 +401,14 @@ POST /api/method/assist.api.plan_pickup_route
     "start_location": "Oslo",
     "preferred_date": "2026-01-20"
 }
+
+# Run marketplace hustle routine (manual trigger)
+POST /api/method/assist.api.run_marketplace_hustle_routine
+{}
+
+# Get marketplace hustle routine status
+POST /api/method/assist.api.get_marketplace_hustle_status
+{}
 ```
 
 ### Norwegian Business
@@ -465,6 +481,34 @@ override_whitelisted_methods = {
 ### App Settings
 
 Configure via Desk → Setup → System Settings or create custom settings doctypes.
+
+### Using the Marketplace Hustle Routine
+
+The marketplace hustle routine automatically monitors marketplace listings and matches them with your needs:
+
+1. **Create Saved Searches:**
+   - Navigate to Assist Tools → Saved Marketplace Search
+   - Create a new search with your query (e.g., "byggningsmaterialer", "paller")
+   - Select the marketplace (Facebook Marketplace or FINN.no)
+   - Choose search type:
+     - **material_request**: Matches against open Material Requests
+     - **purchase_request**: Also matches against open Material Requests
+   - Mark as active
+
+2. **The routine automatically:**
+   - Runs every hour via scheduled task
+   - Fetches new items matching your saved searches
+   - Compares items with open Material Requests and Tasks
+   - Creates notifications when matches are found
+   - Adds comments to matched documents with item details and links
+
+3. **Manual Trigger:**
+   - Use API endpoint: `assist.api.run_marketplace_hustle_routine`
+   - Or via MCP tools in AI assistants
+
+4. **Monitor Status:**
+   - Use API endpoint: `assist.api.get_marketplace_hustle_status`
+   - View saved searches to see last checked time and results found
 
 ---
 
@@ -545,6 +589,8 @@ assist/
 - **[MIGRATION.md](MIGRATION.md)** - Detailed migration guide from v0
 - **[NORWEGIAN_SUPPORT_PROGRAMS.md](NORWEGIAN_SUPPORT_PROGRAMS.md)** - Norwegian support programs and grants index
 - **[STANDARDS_TOOLS.md](STANDARDS_TOOLS.md)** - RDS 81346 and S1000D technical standards
+- **[BRUKTDEL_TRACKING.md](BRUKTDEL_TRACKING.md)** - Guide for tracking car parts on bruktdel.no
+ 
 - **[API Documentation](assist/api.py)** - Complete API reference with examples
 - **[Hooks Reference](assist/hooks.py)** - Available hooks and configuration
 

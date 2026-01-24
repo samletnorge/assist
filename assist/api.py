@@ -929,6 +929,71 @@ def get_enova_support_programs(status: str = "Active") -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve Enova programs"
+def save_bruktdel_search(search_query: str, asset_code: str = None, active: bool = True) -> Dict[str, Any]:
+    """
+    Save a new bruktdel.no search for tracking car parts.
+    
+    Args:
+        search_query: The search term to look for on bruktdel.no
+        asset_code: Optional asset code (car/vehicle) to link this search to
+        active: Whether the search should be active (default: True)
+    
+    Returns:
+        Dictionary with the created search record
+    """
+    try:
+        # Convert string bool to actual bool
+        if isinstance(active, str):
+            active = active.lower() == "true"
+        
+        # Create the saved search
+        doc = frappe.get_doc({
+            "doctype": "Saved Marketplace Search",
+            "user": frappe.session.user,
+            "search_query": search_query,
+            "marketplace": "bruktdel.no",
+            "search_type": "purchase_request",
+            "asset_code": asset_code,
+            "active": active,
+            "last_checked": None,  # Will be set when first check is performed
+            "results_found": 0
+        })
+        doc.insert()
+        frappe.db.commit()
+        
+        return {
+            "success": True,
+            "search_name": doc.name,
+            "message": f"Saved bruktdel.no search for: {search_query}"
+        }
+    except Exception as e:
+        frappe.log_error(f"Save bruktdel.no search error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to save bruktdel.no search"
+        }
+def run_marketplace_hustle_routine() -> Dict[str, Any]:
+    """
+    Manually trigger the marketplace hustle routine.
+    
+    This checks all active saved marketplace searches and matches new items
+    with Material Requests and Tasks.
+    
+    Returns:
+        Dictionary with processing results
+    """
+    try:
+        from assist.utils.marketplace_hustle import check_marketplace_searches
+        
+        result = check_marketplace_searches()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Marketplace hustle routine error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run marketplace hustle routine"         
         }
 
 
@@ -962,7 +1027,30 @@ def get_kommune_support_programs(kommune: str = None, status: str = "Active") ->
                 "eligible_for_housing", "eligible_for_farm"
             ],
             order_by="program_name"
-        )
+def get_car_assets() -> Dict[str, Any]:
+    """
+    Get all car/vehicle assets from the system.
+    
+    This function retrieves assets that are transport vehicles (chart of account 1204)
+    and suitable for tracking parts on bruktdel.no.
+    
+    Returns:
+        Dictionary with list of car assets
+    """
+    try:
+        # Get assets that are transport vehicles (account code 1204)
+        # Based on the existing get_rental_eligible_assets pattern
+        # Using broad category filter - can be made configurable via Site Config if needed
+        assets = frappe.get_all(
+            "Asset",
+            filters={
+                # Match categories containing "vehicle", "car", "transport", etc.
+                # To customize, set 'car_asset_categories' in Site Config
+                "asset_category": ["like", "%vehicle%"],
+                "status": ["in", ["In Use", "Partially Depreciated", "Fully Depreciated"]]
+            },
+            fields=["name", "asset_name", "asset_category", "item_name", "status"],
+            order_by="asset_name asc")
         
         return {
             "success": True,
@@ -977,7 +1065,18 @@ def get_kommune_support_programs(kommune: str = None, status: str = "Active") ->
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve kommune programs"
+            "assets": assets,
+            "count": len(assets)
         }
+    except Exception as e:
+        frappe.log_error(f"Get car assets error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get car assets"
+        
+        }
+        
 
 
 @frappe.whitelist()
@@ -1028,6 +1127,54 @@ def search_support_programs(search_term: str, status: str = "Active") -> Dict[st
             "success": False,
             "error": str(e),
             "message": "Failed to search support programs"
+        }
+          
+def get_bruktdel_searches(asset_code: str = None, active_only: bool = True) -> Dict[str, Any]:
+    """
+    Get saved bruktdel.no searches, optionally filtered by asset.
+    
+    Args:
+        asset_code: Optional asset code to filter searches
+        active_only: If True, only return active searches (default: True)
+    
+    Returns:
+        Dictionary with list of saved searches
+    """
+    try:
+        # Convert string bool to actual bool
+        if isinstance(active_only, str):
+            active_only = active_only.lower() == "true"
+        
+        # Build filters
+        filters = {
+            "marketplace": "bruktdel.no"
+        }
+        
+        if active_only:
+            filters["active"] = 1
+            
+        if asset_code:
+            filters["asset_code"] = asset_code
+        
+        # Get the searches
+        searches = frappe.get_all(
+            "Saved Marketplace Search",
+            filters=filters,
+            fields=["name", "search_query", "asset_code", "active", "last_checked", "results_found", "user"],
+            order_by="last_checked desc"
+        )
+        
+        return {
+            "success": True,
+            "searches": searches,
+            "count": len(searches)
+        }
+    except Exception as e:
+        frappe.log_error(f"Get bruktdel.no searches error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get bruktdel.no searches"    
         }
 
 
@@ -1136,4 +1283,80 @@ def get_highlighted_kommune_news(kommune: str = None, limit: int = 10) -> Dict[s
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve highlighted news"
+        }
+def trigger_bruktdel_check(search_name: str = None) -> Dict[str, Any]:
+    """
+    Manually trigger a check of bruktdel.no for a specific search or all active searches.
+    
+    Args:
+        search_name: Optional specific search to check. If None, checks all active searches.
+    
+    Returns:
+        Dictionary with check results
+    """
+    try:
+        from assist.tasks import check_bruktdel_searches, check_bruktdel_listing
+        
+        if search_name:
+            # Check a specific search
+            search = frappe.get_doc("Saved Marketplace Search", search_name)
+            
+            if search.marketplace != "bruktdel.no":
+                return {
+                    "success": False,
+                    "message": "Search is not for bruktdel.no marketplace"
+                }
+            
+            results_count = check_bruktdel_listing(
+                search_query=search.search_query,
+                asset_code=search.asset_code,
+                user=search.user
+            )
+            
+            # Update the search record
+            search.last_checked = frappe.utils.now()
+            search.results_found = results_count
+            search.save(ignore_permissions=True)
+            frappe.db.commit()
+            
+            return {
+                "success": True,
+                "search_name": search_name,
+                "results_found": results_count,
+                "message": f"Checked bruktdel.no: {results_count} results found"
+            }
+        else:
+            # Check all active searches
+            check_bruktdel_searches()
+            
+            return {
+                "success": True,
+                "message": "Triggered check for all active bruktdel.no searches"
+            }
+            
+    except Exception as e:
+        frappe.log_error(f"Trigger bruktdel.no check error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to trigger bruktdel.no check"
+        }
+def get_marketplace_hustle_status() -> Dict[str, Any]:
+    """
+    Get the current status of the marketplace hustle routine.
+    
+    Returns:
+        Dictionary with status information including active searches and recent activity
+    """
+    try:
+        from assist.utils.marketplace_hustle import get_hustle_routine_status
+        
+        result = get_hustle_routine_status()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Get marketplace hustle status error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get marketplace hustle routine status"
         }
