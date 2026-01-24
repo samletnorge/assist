@@ -138,6 +138,13 @@ sequenceDiagram
   - Batch processing support
   - Multiple format support (PNG, JPG, WebP)
 
+- **Camera Stock Upload** ⭐ NEW!
+  - Quick add items using phone camera
+  - Batch upload for multiple items at once
+  - Automatic background removal and enhancement
+  - Intuitive mobile-first interface
+  - Real-time processing status tracking
+
 - **Receipt Scanning**
   - OCR text extraction
   - Automatic item detection

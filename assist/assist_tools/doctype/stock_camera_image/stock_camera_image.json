@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image_file",
+  "image_preview",
+  "column_break_1",
+  "image_name",
+  "status",
+  "item_code",
+  "error_message"
+ ],
+ "fields": [
+  {
+   "fieldname": "image_file",
+   "fieldtype": "Attach Image",
+   "in_list_view": 1,
+   "label": "Image File",
+   "reqd": 1
+  },
+  {
+   "fieldname": "image_preview",
+   "fieldtype": "Image",
+   "label": "Preview",
+   "options": "image_file"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Image Name"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nProcessing\nCompleted\nFailed"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Created Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "error_message",
+   "fieldtype": "Text",
+   "label": "Error Message"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-01-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Stock Camera Image",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
