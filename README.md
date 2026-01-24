@@ -164,6 +164,17 @@ sequenceDiagram
 - Price suggestion
 - Listing synchronization
 - Phone-control automation
+- **Google Maps Route Generation** ⭐ NEW!
+  - Automatic route link generation for pickup locations
+  - Multi-listing route optimization
+  - Seller contact tracking
+- **Packaging Management** ⭐ NEW!
+  - Track packaging status (Pending/In Progress/Completed)
+  - Packaging notes and requirements
+- **Auto Photoshoot** ⭐ NEW!
+  - Automated multi-angle product photography
+  - Integration with camera batch upload
+  - Background removal and enhancement
 
 ### 🏢 Norwegian Business Tools
 
@@ -379,6 +390,22 @@ POST /api/method/assist.api.plan_pickup_route
     "listings": ["listing-1", "listing-2"],
     "start_location": "Oslo",
     "preferred_date": "2026-01-20"
+}
+
+# Generate Google Maps route for multiple listings ⭐ NEW!
+POST /api/method/assist.api.generate_marketplace_route
+{
+    "listing_ids": "[\"ML-00001\", \"ML-00002\", \"ML-00003\"]",
+    "start_location": "Oslo, Norway"
+}
+
+# Auto photoshoot for rental items ⭐ NEW!
+POST /api/method/assist.api.auto_photoshoot_rental_item
+{
+    "listing_id": "ML-00001",
+    "remove_background": true,
+    "enhance_image": true,
+    "num_angles": 4
 }
 ```
 
