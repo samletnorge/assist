@@ -284,8 +284,8 @@ def get_planting_weather_advice(latitude: float, longitude: float, crop_name: st
         if crop_name:
             try:
                 crop = frappe.get_doc("Crop", crop_name)
-                min_temp = crop.min_temperature_celsius or 0
-                frost_tolerant = crop.frost_tolerant
+                min_temp = getattr(crop, 'min_temperature_celsius', 0) or 0
+                frost_tolerant = getattr(crop, 'frost_tolerant', False)
                 
                 if not frost_tolerant and frost_count > 0:
                     crop_advice = f"{crop_name} is not frost-tolerant - wait until frost risk passes"
@@ -293,8 +293,17 @@ def get_planting_weather_advice(latitude: float, longitude: float, crop_name: st
                     crop_advice = f"{crop_name} prefers temperatures above {min_temp}°C - current conditions may slow growth"
                 else:
                     crop_advice = f"Weather conditions are suitable for planting {crop_name}"
-            except:
-                pass
+            except Exception as e:
+                # Crop not found or error accessing crop data
+                frappe.log_error(f"Error getting crop data for {crop_name}: {str(e)}", "Crop Weather Advice Error")
+        
+        # Calculate average temperature safely
+        avg_temp_forecast = None
+        if next_week:
+            temps = [d.get("temperature", {}).get("avg", 0) for d in next_week]
+            valid_temps = [t for t in temps if t is not None]
+            if valid_temps:
+                avg_temp_forecast = round(sum(valid_temps) / len(valid_temps), 1)
         
         return {
             "success": True,
@@ -305,7 +314,7 @@ def get_planting_weather_advice(latitude: float, longitude: float, crop_name: st
             "crop_specific_advice": crop_advice,
             "forecast_summary": {
                 "days": len(next_week),
-                "avg_temperature": round(sum(d.get("temperature", {}).get("avg", 0) for d in next_week) / len(next_week), 1) if next_week else None,
+                "avg_temperature": avg_temp_forecast,
                 "total_precipitation_mm": round(total_precip, 1),
                 "frost_days": frost_count
             }

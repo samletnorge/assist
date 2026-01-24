@@ -2036,7 +2036,7 @@ def get_weather_for_garden_plot(plot_name: str, days: int = 7) -> Dict[str, Any]
     try:
         plot = frappe.get_doc("Garden Plot", plot_name)
         
-        # Parse location string (should be in format "City" or "Lat,Lon")
+        # Parse location string (must be in format "Lat,Lon")
         location = plot.location
         
         if not location:
@@ -2045,7 +2045,7 @@ def get_weather_for_garden_plot(plot_name: str, days: int = 7) -> Dict[str, Any]
                 "message": "Garden plot has no location set"
             }
         
-        # Try to parse as coordinates first
+        # Parse as coordinates
         if ',' in location:
             parts = location.split(',')
             if len(parts) == 2:
