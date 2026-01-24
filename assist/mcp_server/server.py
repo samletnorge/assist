@@ -1838,6 +1838,58 @@ def submit_lyngdal_kommune_application(kommune: str, application_type: str, data
         }
 
 
+@mcp.tool()
+def run_marketplace_hustle_routine() -> Dict[str, Any]:
+    """
+    Trigger the marketplace hustle routine to check saved marketplace searches.
+    
+    This function checks all active saved marketplace searches (finn.no, Facebook Marketplace)
+    for new items matching building materials, pallets, tracks, or other needed items.
+    When new items are found, it checks if they match Material Requests or Tasks,
+    and creates notifications for matches.
+    
+    Returns:
+        Dictionary with processing results including searches processed, items found, and matches created
+    """
+    try:
+        from assist.utils.marketplace_hustle import check_marketplace_searches
+        
+        result = check_marketplace_searches()
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run marketplace hustle routine"
+        }
+
+
+@mcp.tool()
+def get_marketplace_hustle_status() -> Dict[str, Any]:
+    """
+    Get the current status of the marketplace hustle routine.
+    
+    Returns statistics about saved marketplace searches including:
+    - Total number of saved searches
+    - Number of active searches
+    - Recent search activity and results
+    
+    Returns:
+        Dictionary with status information
+    """
+    try:
+        from assist.utils.marketplace_hustle import get_hustle_routine_status
+        
+        result = get_hustle_routine_status()
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get marketplace hustle routine status"
+        }
+
+
 def run_server(transport: str = "stdio"):
     """
     Run the MCP server with the specified transport.
