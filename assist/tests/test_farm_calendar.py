@@ -203,6 +203,39 @@ class TestFarmCalendar(unittest.TestCase):
             if 'norwegian_zone' in crop:
                 self.assertIn(crop['norwegian_zone'], valid_zones, 
                             f"Invalid zone for {crop['crop_name']}")
+    
+    def test_weather_utility_module_exists(self):
+        """Test that weather utility module exists"""
+        weather_module_path = os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            'utils',
+            'weather_yr.py'
+        )
+        
+        self.assertTrue(os.path.exists(weather_module_path), "Weather utility module not found")
+    
+    def test_api_has_weather_endpoints(self):
+        """Test that API has weather endpoint methods"""
+        try:
+            from assist import api
+            self.assertTrue(hasattr(api, 'get_weather_forecast_for_location'))
+            self.assertTrue(hasattr(api, 'get_frost_risk_for_location'))
+            self.assertTrue(hasattr(api, 'get_planting_weather_advice_for_location'))
+            self.assertTrue(hasattr(api, 'get_weather_for_garden_plot'))
+        except ImportError as e:
+            self.skipTest(f"Skipping: Frappe not available - {e}")
+    
+    def test_weather_module_has_required_functions(self):
+        """Test that weather module has required functions"""
+        try:
+            from assist.utils import weather_yr
+            self.assertTrue(hasattr(weather_yr, 'get_weather_forecast'))
+            self.assertTrue(hasattr(weather_yr, 'parse_yr_forecast'))
+            self.assertTrue(hasattr(weather_yr, 'get_frost_risk'))
+            self.assertTrue(hasattr(weather_yr, 'get_planting_weather_advice'))
+        except ImportError as e:
+            self.skipTest(f"Skipping: Module not available - {e}")
 
 
 if __name__ == '__main__':

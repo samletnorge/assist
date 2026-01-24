@@ -130,6 +130,29 @@ Generate seed and plant shopping lists:
 - Lists all planting dates
 - Helps budget planning
 
+### 9. Weather Integration (yr.no) ⭐ NEW!
+
+Real-time weather data from the Norwegian Meteorological Institute:
+
+- **7-Day Forecast** - Temperature, precipitation, wind, humidity
+- **Frost Risk Alerts** - Know when frost is expected to protect crops
+- **Planting Advice** - Weather-based recommendations for when to plant
+- **Crop-Specific Guidance** - Tailored advice based on crop requirements
+- **Garden Plot Weather** - Automatic forecast for your plot's location
+
+**Weather Data Includes:**
+- Daily min/max/average temperatures
+- Precipitation amounts in mm
+- Wind speed in m/s
+- Relative humidity percentage
+- Weather symbols (clear, cloudy, rain, etc.)
+
+**Smart Features:**
+- Warns about frost risk for frost-sensitive crops
+- Suggests delaying planting during heavy rain
+- Recommends irrigation during dry periods
+- Considers crop temperature requirements
+
 ---
 
 ## 🚀 Getting Started
@@ -382,6 +405,138 @@ Response:
     ],
     "total_tasks": 8
 }
+```
+
+### Weather Forecast
+
+Get 7-day weather forecast from yr.no:
+
+```python
+POST /api/method/assist.api.get_weather_forecast_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "days": 7
+}
+
+Response:
+{
+    "success": true,
+    "location": {
+        "latitude": 59.9139,
+        "longitude": 10.7522
+    },
+    "forecast": [
+        {
+            "date": "2026-04-15",
+            "temperature": {
+                "min": 8.5,
+                "max": 15.2,
+                "avg": 11.8
+            },
+            "precipitation_mm": 2.5,
+            "wind_speed_ms": 4.2,
+            "humidity_percent": 75,
+            "weather_symbol": "partlycloudy_day"
+        },
+        ...
+    ],
+    "source": "yr.no (Norwegian Meteorological Institute)",
+    "last_updated": "2026-04-15T06:00:00Z"
+}
+```
+
+### Frost Risk Check
+
+Check for frost risk in upcoming days:
+
+```python
+POST /api/method/assist.api.get_frost_risk_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522
+}
+
+Response:
+{
+    "success": true,
+    "location": {
+        "latitude": 59.9139,
+        "longitude": 10.7522
+    },
+    "frost_risk": true,
+    "frost_days": [
+        {
+            "date": "2026-04-18",
+            "min_temperature": -2.1,
+            "severity": "Light Frost"
+        }
+    ],
+    "message": "Frost expected on 1 days"
+}
+```
+
+### Planting Weather Advice
+
+Get weather-based planting recommendations:
+
+```python
+POST /api/method/assist.api.get_planting_weather_advice_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "crop_name": "Tomat (Tomato)"
+}
+
+Response:
+{
+    "success": true,
+    "location": {
+        "latitude": 59.9139,
+        "longitude": 10.7522
+    },
+    "crop": "Tomat (Tomato)",
+    "advice": [
+        "Temperature is suitable for planting warm-season crops",
+        "Moderate rainfall expected - good conditions for planting"
+    ],
+    "warnings": [
+        "Frost expected on 1 days in the next week - delay planting frost-sensitive crops"
+    ],
+    "crop_specific_advice": "Tomat (Tomato) is not frost-tolerant - wait until frost risk passes",
+    "forecast_summary": {
+        "days": 7,
+        "avg_temperature": 11.5,
+        "total_precipitation_mm": 15.3,
+        "frost_days": 1
+    }
+}
+```
+
+### Weather for Garden Plot
+
+Get weather forecast for a garden plot's location:
+
+```python
+POST /api/method/assist.api.get_weather_for_garden_plot
+{
+    "plot_name": "Main Vegetable Garden",
+    "days": 7
+}
+
+Response:
+{
+    "success": true,
+    "garden_plot": "Main Vegetable Garden",
+    "location": {
+        "latitude": 59.9139,
+        "longitude": 10.7522
+    },
+    "forecast": [...],
+    "source": "yr.no (Norwegian Meteorological Institute)"
+}
+
+Note: Garden Plot location must be in "latitude,longitude" format (e.g., "59.9139,10.7522")
 ```
 
 ---

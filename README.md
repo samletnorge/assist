@@ -264,6 +264,14 @@ Evidence-based garden planning system optimized for Norwegian climate zones:
   - Variety tracking
   - Budget planning
 
+- **Weather Integration (yr.no)** ⭐ NEW!
+  - Real-time weather from Norwegian Meteorological Institute
+  - 7-day forecasts with temperature, precipitation, wind
+  - Frost risk alerts for crop protection
+  - Weather-based planting advice
+  - Crop-specific recommendations
+  - Automatic weather for garden plots
+
 ### 🤖 MCP Server (AI Integration)
 
 The MCP server exposes ERPNext operations to AI models:
@@ -570,6 +578,36 @@ POST /api/method/assist.api.generate_garden_shopping_list
 POST /api/method/assist.api.get_upcoming_garden_tasks
 {
     "days_ahead": 14
+}
+
+# Get weather forecast from yr.no
+POST /api/method/assist.api.get_weather_forecast_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "days": 7
+}
+
+# Check frost risk
+POST /api/method/assist.api.get_frost_risk_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522
+}
+
+# Get weather-based planting advice
+POST /api/method/assist.api.get_planting_weather_advice_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "crop_name": "Tomat (Tomato)"
+}
+
+# Get weather for garden plot
+POST /api/method/assist.api.get_weather_for_garden_plot
+{
+    "plot_name": "Main Garden",
+    "days": 7
 }
 ```
 

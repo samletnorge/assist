@@ -1892,3 +1892,189 @@ def get_upcoming_garden_tasks(days_ahead: int = 14) -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to get upcoming garden tasks"
         }
+
+
+# ============================================================================
+# Weather Integration (yr.no) API Endpoints
+# ============================================================================
+
+
+@frappe.whitelist()
+def get_weather_forecast_for_location(latitude: float, longitude: float, days: int = 7) -> Dict[str, Any]:
+    """
+    Get weather forecast from yr.no for a specific location.
+    
+    Args:
+        latitude: Latitude coordinate (e.g., 59.9139 for Oslo)
+        longitude: Longitude coordinate (e.g., 10.7522 for Oslo)
+        days: Number of days to forecast (default: 7, max: 10)
+    
+    Returns:
+        Dictionary with weather forecast data from Norwegian Meteorological Institute
+    """
+    try:
+        from assist.utils.weather_yr import get_weather_forecast
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        days = int(days)
+        
+        if days < 1 or days > 10:
+            return {
+                "success": False,
+                "error": "Days must be between 1 and 10",
+                "message": "Invalid days parameter"
+            }
+        
+        result = get_weather_forecast(latitude, longitude, days)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid latitude or longitude"
+        }
+    except Exception as e:
+        frappe.log_error(f"Weather forecast error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get weather forecast"
+        }
+
+
+@frappe.whitelist()
+def get_frost_risk_for_location(latitude: float, longitude: float) -> Dict[str, Any]:
+    """
+    Check for frost risk in the upcoming days.
+    
+    Args:
+        latitude: Latitude coordinate
+        longitude: Longitude coordinate
+    
+    Returns:
+        Dictionary with frost risk assessment for the next 7 days
+    """
+    try:
+        from assist.utils.weather_yr import get_frost_risk
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        
+        result = get_frost_risk(latitude, longitude)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid latitude or longitude"
+        }
+    except Exception as e:
+        frappe.log_error(f"Frost risk check error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to check frost risk"
+        }
+
+
+@frappe.whitelist()
+def get_planting_weather_advice_for_location(
+    latitude: float, 
+    longitude: float, 
+    crop_name: str = None
+) -> Dict[str, Any]:
+    """
+    Get weather-based planting advice for a location.
+    
+    Args:
+        latitude: Latitude coordinate
+        longitude: Longitude coordinate
+        crop_name: Optional crop name for crop-specific advice
+    
+    Returns:
+        Dictionary with planting advice based on current weather conditions
+    """
+    try:
+        from assist.utils.weather_yr import get_planting_weather_advice
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        
+        result = get_planting_weather_advice(latitude, longitude, crop_name)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid parameters"
+        }
+    except Exception as e:
+        frappe.log_error(f"Planting weather advice error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get planting advice"
+        }
+
+
+@frappe.whitelist()
+def get_weather_for_garden_plot(plot_name: str, days: int = 7) -> Dict[str, Any]:
+    """
+    Get weather forecast for a garden plot's location.
+    
+    Args:
+        plot_name: Name of the Garden Plot
+        days: Number of days to forecast (default: 7)
+    
+    Returns:
+        Dictionary with weather forecast for the plot's location
+    """
+    try:
+        plot = frappe.get_doc("Garden Plot", plot_name)
+        
+        # Parse location string (should be in format "City" or "Lat,Lon")
+        location = plot.location
+        
+        if not location:
+            return {
+                "success": False,
+                "message": "Garden plot has no location set"
+            }
+        
+        # Try to parse as coordinates first
+        if ',' in location:
+            parts = location.split(',')
+            if len(parts) == 2:
+                try:
+                    latitude = float(parts[0].strip())
+                    longitude = float(parts[1].strip())
+                    
+                    from assist.utils.weather_yr import get_weather_forecast
+                    result = get_weather_forecast(latitude, longitude, int(days))
+                    result["garden_plot"] = plot_name
+                    return result
+                except ValueError:
+                    pass
+        
+        # If not coordinates, suggest using coordinates
+        return {
+            "success": False,
+            "message": f"Garden plot location '{location}' should be in 'latitude,longitude' format (e.g., '59.9139,10.7522' for Oslo). Please update the Garden Plot location field."
+        }
+        
+    except frappe.DoesNotExistError:
+        return {
+            "success": False,
+            "message": f"Garden Plot '{plot_name}' not found"
+        }
+    except Exception as e:
+        frappe.log_error(f"Weather for garden plot error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get weather for garden plot"
+        }
