@@ -162,3 +162,115 @@ def daily_marketplace_summary():
             message=str(e),
             title="Error in daily_marketplace_summary scheduled task"
         )
+
+
+def send_garden_reminders():
+    """
+    Send email reminders for upcoming planting and harvest tasks.
+    
+    This function runs daily and:
+    1. Gets all active Garden Planting Schedules with email reminders enabled
+    2. Checks for upcoming planting and harvest dates
+    3. Sends email reminders to users
+    """
+    try:
+        from frappe.utils import getdate, add_days
+        from datetime import datetime
+        
+        today = getdate()
+        
+        # Get all schedules with reminders enabled
+        schedules = frappe.get_all(
+            "Garden Planting Schedule",
+            filters={
+                "enable_email_reminders": 1
+            },
+            fields=["name", "schedule_name", "garden_plot", "reminder_email",
+                   "reminder_days_before_planting", "reminder_days_before_harvest"]
+        )
+        
+        if not schedules:
+            frappe.logger().info("No garden planting schedules with reminders enabled")
+            return
+        
+        frappe.logger().info(f"Checking {len(schedules)} garden planting schedules for reminders")
+        
+        for schedule_info in schedules:
+            try:
+                schedule = frappe.get_doc("Garden Planting Schedule", schedule_info["name"])
+                
+                if not schedule.reminder_email:
+                    continue
+                
+                reminders = schedule.get_planting_reminders()
+                
+                if reminders:
+                    # Send email with reminders
+                    send_reminder_email(schedule, reminders)
+                    
+                    frappe.logger().info(
+                        f"Sent {len(reminders)} reminders for schedule {schedule.name}"
+                    )
+            
+            except Exception as e:
+                frappe.log_error(
+                    message=str(e),
+                    title=f"Error processing reminders for schedule {schedule_info['name']}"
+                )
+        
+    except Exception as e:
+        frappe.log_error(
+            message=str(e),
+            title="Error in send_garden_reminders scheduled task"
+        )
+
+
+def send_reminder_email(schedule, reminders):
+    """
+    Send email reminder for garden tasks.
+    
+    Args:
+        schedule: Garden Planting Schedule document
+        reminders: List of reminder dictionaries
+    """
+    try:
+        # Build email content
+        planting_reminders = [r for r in reminders if r["type"] == "planting"]
+        harvest_reminders = [r for r in reminders if r["type"] == "harvest"]
+        
+        message = f"""
+        <h2>Garden Planting Reminders for {schedule.schedule_name}</h2>
+        <p>Garden Plot: {schedule.garden_plot}</p>
+        """
+        
+        if planting_reminders:
+            message += "<h3>Upcoming Planting Tasks</h3><ul>"
+            for reminder in planting_reminders:
+                variety_text = f" ({reminder['variety']})" if reminder.get('variety') else ""
+                message += f"<li><strong>{reminder['crop']}{variety_text}</strong> - Plant in {reminder['days_until']} days ({reminder['date']})</li>"
+            message += "</ul>"
+        
+        if harvest_reminders:
+            message += "<h3>Upcoming Harvest Tasks</h3><ul>"
+            for reminder in harvest_reminders:
+                variety_text = f" ({reminder['variety']})" if reminder.get('variety') else ""
+                message += f"<li><strong>{reminder['crop']}{variety_text}</strong> - Ready to harvest in {reminder['days_until']} days ({reminder['date']})</li>"
+            message += "</ul>"
+        
+        message += """
+        <p>Good luck with your gardening!</p>
+        <p><small>This is an automated reminder from your Assist Farm Season Calendar.</small></p>
+        """
+        
+        # Send email
+        frappe.sendmail(
+            recipients=[schedule.reminder_email],
+            subject=f"Garden Reminders: {schedule.schedule_name}",
+            message=message
+        )
+        
+    except Exception as e:
+        frappe.log_error(
+            message=str(e),
+            title=f"Error sending reminder email for schedule {schedule.name}"
+        )

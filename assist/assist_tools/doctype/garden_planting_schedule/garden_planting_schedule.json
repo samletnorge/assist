@@ -1,0 +1,186 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "basic_info_section",
+  "schedule_name",
+  "garden_plot",
+  "year",
+  "column_break_1",
+  "season",
+  "norwegian_zone",
+  "planting_items_section",
+  "planting_items",
+  "rotation_section",
+  "previous_season_plot",
+  "rotation_notes",
+  "reminders_section",
+  "enable_email_reminders",
+  "reminder_email",
+  "column_break_4",
+  "reminder_days_before_planting",
+  "reminder_days_before_harvest"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "GPS-.YYYY.-"
+  },
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "schedule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Schedule Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "garden_plot",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Garden Plot",
+   "options": "Garden Plot",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "season",
+   "fieldtype": "Select",
+   "label": "Season",
+   "options": "Spring\nSummer\nFall\nWinter\nYear-Round"
+  },
+  {
+   "description": "Auto-filled from Garden Plot",
+   "fetch_from": "garden_plot.norwegian_zone",
+   "fieldname": "norwegian_zone",
+   "fieldtype": "Data",
+   "label": "Norwegian Zone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planting_items_section",
+   "fieldtype": "Section Break",
+   "label": "Planting Items"
+  },
+  {
+   "fieldname": "planting_items",
+   "fieldtype": "Table",
+   "label": "Planting Items",
+   "options": "Garden Planting Item"
+  },
+  {
+   "fieldname": "rotation_section",
+   "fieldtype": "Section Break",
+   "label": "Crop Rotation"
+  },
+  {
+   "description": "Link to previous season's planting schedule for crop rotation tracking",
+   "fieldname": "previous_season_plot",
+   "fieldtype": "Link",
+   "label": "Previous Season Plot",
+   "options": "Garden Planting Schedule"
+  },
+  {
+   "fieldname": "rotation_notes",
+   "fieldtype": "Text Editor",
+   "label": "Rotation Notes"
+  },
+  {
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Email Reminders"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_email_reminders",
+   "fieldtype": "Check",
+   "label": "Enable Email Reminders"
+  },
+  {
+   "depends_on": "enable_email_reminders",
+   "fieldname": "reminder_email",
+   "fieldtype": "Data",
+   "label": "Reminder Email"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "depends_on": "enable_email_reminders",
+   "description": "Send reminder this many days before planting date",
+   "fieldname": "reminder_days_before_planting",
+   "fieldtype": "Int",
+   "label": "Days Before Planting"
+  },
+  {
+   "default": "7",
+   "depends_on": "enable_email_reminders",
+   "description": "Send reminder this many days before expected harvest",
+   "fieldname": "reminder_days_before_harvest",
+   "fieldtype": "Int",
+   "label": "Days Before Harvest"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Garden Planting Schedule",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agriculture Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,261 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:crop_name",
+ "creation": "2026-01-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_info_section",
+  "crop_name",
+  "scientific_name",
+  "crop_family",
+  "column_break_1",
+  "crop_type",
+  "norwegian_zone",
+  "growing_season_section",
+  "planting_start_month",
+  "planting_end_month",
+  "harvest_start_month",
+  "harvest_end_month",
+  "column_break_2",
+  "days_to_maturity",
+  "succession_planting_interval_days",
+  "hardiness_section",
+  "min_temperature_celsius",
+  "max_temperature_celsius",
+  "frost_tolerant",
+  "column_break_3",
+  "sun_requirement",
+  "water_requirement",
+  "spacing_section",
+  "spacing_between_plants_cm",
+  "spacing_between_rows_cm",
+  "planting_depth_cm",
+  "description_section",
+  "description",
+  "growing_tips",
+  "companion_plants_section",
+  "good_companions",
+  "bad_companions"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "crop_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Crop Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "scientific_name",
+   "fieldtype": "Data",
+   "label": "Scientific Name"
+  },
+  {
+   "fieldname": "crop_family",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Crop Family",
+   "options": "Solanaceae (Nightshade)\nBrassicaceae (Cabbage)\nFabaceae (Legume)\nCucurbitaceae (Gourd)\nApiaceae (Carrot)\nAlliaceae (Onion)\nAsteraceae (Aster)\nChenopodiaceae (Beet)\nOther"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "crop_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Crop Type",
+   "options": "Vegetable\nFruit\nHerb\nGrain\nRoot Vegetable\nLeafy Green\nOther",
+   "reqd": 1
+  },
+  {
+   "description": "Norwegian climate zone (1-8, where 1 is warmest)",
+   "fieldname": "norwegian_zone",
+   "fieldtype": "Select",
+   "label": "Norwegian Zone",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\nAll Zones"
+  },
+  {
+   "fieldname": "growing_season_section",
+   "fieldtype": "Section Break",
+   "label": "Growing Season"
+  },
+  {
+   "fieldname": "planting_start_month",
+   "fieldtype": "Select",
+   "label": "Planting Start Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "planting_end_month",
+   "fieldtype": "Select",
+   "label": "Planting End Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "harvest_start_month",
+   "fieldtype": "Select",
+   "label": "Harvest Start Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "harvest_end_month",
+   "fieldtype": "Select",
+   "label": "Harvest End Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Number of days from planting to harvest",
+   "fieldname": "days_to_maturity",
+   "fieldtype": "Int",
+   "label": "Days to Maturity"
+  },
+  {
+   "description": "Days between successive plantings for continuous harvest",
+   "fieldname": "succession_planting_interval_days",
+   "fieldtype": "Int",
+   "label": "Succession Planting Interval (Days)"
+  },
+  {
+   "fieldname": "hardiness_section",
+   "fieldtype": "Section Break",
+   "label": "Hardiness & Requirements"
+  },
+  {
+   "fieldname": "min_temperature_celsius",
+   "fieldtype": "Float",
+   "label": "Min Temperature (°C)"
+  },
+  {
+   "fieldname": "max_temperature_celsius",
+   "fieldtype": "Float",
+   "label": "Max Temperature (°C)"
+  },
+  {
+   "default": "0",
+   "fieldname": "frost_tolerant",
+   "fieldtype": "Check",
+   "label": "Frost Tolerant"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sun_requirement",
+   "fieldtype": "Select",
+   "label": "Sun Requirement",
+   "options": "Full Sun (6+ hours)\nPartial Sun (4-6 hours)\nPartial Shade (2-4 hours)\nFull Shade (<2 hours)"
+  },
+  {
+   "fieldname": "water_requirement",
+   "fieldtype": "Select",
+   "label": "Water Requirement",
+   "options": "Low\nMedium\nHigh"
+  },
+  {
+   "fieldname": "spacing_section",
+   "fieldtype": "Section Break",
+   "label": "Spacing"
+  },
+  {
+   "fieldname": "spacing_between_plants_cm",
+   "fieldtype": "Int",
+   "label": "Spacing Between Plants (cm)"
+  },
+  {
+   "fieldname": "spacing_between_rows_cm",
+   "fieldtype": "Int",
+   "label": "Spacing Between Rows (cm)"
+  },
+  {
+   "fieldname": "planting_depth_cm",
+   "fieldtype": "Float",
+   "label": "Planting Depth (cm)"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "growing_tips",
+   "fieldtype": "Text Editor",
+   "label": "Growing Tips"
+  },
+  {
+   "fieldname": "companion_plants_section",
+   "fieldtype": "Section Break",
+   "label": "Companion Planting"
+  },
+  {
+   "description": "Comma-separated list of crops that grow well with this crop",
+   "fieldname": "good_companions",
+   "fieldtype": "Small Text",
+   "label": "Good Companions"
+  },
+  {
+   "description": "Comma-separated list of crops that should not be planted near this crop",
+   "fieldname": "bad_companions",
+   "fieldtype": "Small Text",
+   "label": "Bad Companions"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Crop",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agriculture Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

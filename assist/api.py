@@ -1463,5 +1463,395 @@ def get_marketplace_hustle_status() -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to get marketplace hustle routine status"
-          
+        }
+
+
+# ============================================================================
+# Farm Season Calendar API Endpoints
+# ============================================================================
+
+
+@frappe.whitelist()
+def get_planting_calendar(norwegian_zone: str = None, month: str = None) -> Dict[str, Any]:
+    """
+    Get planting calendar recommendations for Norwegian climate zones.
+    
+    Args:
+        norwegian_zone: Norwegian climate zone (1-8, or "All Zones")
+        month: Optional month to filter crops (e.g., "May")
+    
+    Returns:
+        Dictionary with list of crops suitable for planting
+    """
+    try:
+        filters = {}
+        
+        if norwegian_zone and norwegian_zone != "All Zones":
+            filters["norwegian_zone"] = ["in", [norwegian_zone, "All Zones"]]
+        
+        if month:
+            # Get crops where planting period includes this month
+            filters["planting_start_month"] = ["<=", month]
+            filters["planting_end_month"] = [">=", month]
+        
+        crops = frappe.get_all(
+            "Crop",
+            filters=filters,
+            fields=[
+                "name", "crop_name", "crop_family", "crop_type", "norwegian_zone",
+                "planting_start_month", "planting_end_month", "harvest_start_month",
+                "harvest_end_month", "days_to_maturity", "succession_planting_interval_days",
+                "frost_tolerant", "sun_requirement", "water_requirement",
+                "spacing_between_plants_cm", "spacing_between_rows_cm", "good_companions",
+                "bad_companions"
+            ],
+            order_by="crop_name"
+        )
+        
+        return {
+            "success": True,
+            "crops": crops,
+            "count": len(crops),
+            "zone": norwegian_zone or "All Zones",
+            "month": month or "All Months",
+            "message": f"Found {len(crops)} crops for planting"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get planting calendar error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get planting calendar"
+        }
+
+
+@frappe.whitelist()
+def get_companion_planting_suggestions(crop_name: str) -> Dict[str, Any]:
+    """
+    Get companion planting suggestions for a specific crop.
+    
+    Args:
+        crop_name: Name of the crop to get companion suggestions for
+    
+    Returns:
+        Dictionary with good and bad companion plants
+    """
+    try:
+        crop = frappe.get_doc("Crop", crop_name)
+        
+        good_companions = []
+        if crop.good_companions:
+            companion_names = [c.strip() for c in crop.good_companions.split(',')]
+            for companion_name in companion_names:
+                # Try to find the crop
+                crops = frappe.get_all(
+                    "Crop",
+                    filters={"crop_name": ["like", f"%{companion_name}%"]},
+                    fields=["crop_name", "crop_family", "crop_type"],
+                    limit=1
+                )
+                if crops:
+                    good_companions.append(crops[0])
+                else:
+                    good_companions.append({"crop_name": companion_name, "crop_family": "", "crop_type": ""})
+        
+        bad_companions = []
+        if crop.bad_companions:
+            companion_names = [c.strip() for c in crop.bad_companions.split(',')]
+            for companion_name in companion_names:
+                crops = frappe.get_all(
+                    "Crop",
+                    filters={"crop_name": ["like", f"%{companion_name}%"]},
+                    fields=["crop_name", "crop_family", "crop_type"],
+                    limit=1
+                )
+                if crops:
+                    bad_companions.append(crops[0])
+                else:
+                    bad_companions.append({"crop_name": companion_name, "crop_family": "", "crop_type": ""})
+        
+        return {
+            "success": True,
+            "crop": crop_name,
+            "good_companions": good_companions,
+            "bad_companions": bad_companions,
+            "message": f"Found {len(good_companions)} good and {len(bad_companions)} bad companions"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get companion planting suggestions error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get companion planting suggestions"
+        }
+
+
+@frappe.whitelist()
+def get_crop_rotation_suggestions(garden_plot: str, previous_crop: str = None) -> Dict[str, Any]:
+    """
+    Get crop rotation suggestions based on previous crops in a garden plot.
+    
+    Args:
+        garden_plot: Name of the garden plot
+        previous_crop: Optional name of the crop previously planted
+    
+    Returns:
+        Dictionary with suggested crops for rotation
+    """
+    try:
+        suggestions = []
+        avoid_crops = []
+        
+        if previous_crop:
+            prev_crop_doc = frappe.get_doc("Crop", previous_crop)
+            prev_family = prev_crop_doc.crop_family
+            
+            # Get crops from different families for rotation
+            suggestions = frappe.get_all(
+                "Crop",
+                filters={
+                    "crop_family": ["!=", prev_family]
+                },
+                fields=[
+                    "crop_name", "crop_family", "crop_type", "planting_start_month",
+                    "planting_end_month", "days_to_maturity"
+                ],
+                order_by="crop_name",
+                limit=20
+            )
+            
+            # Get crops from same family to avoid
+            avoid_crops = frappe.get_all(
+                "Crop",
+                filters={
+                    "crop_family": prev_family,
+                    "crop_name": ["!=", previous_crop]
+                },
+                fields=["crop_name", "crop_family"],
+                order_by="crop_name"
+            )
+        else:
+            # No previous crop, suggest all crops
+            suggestions = frappe.get_all(
+                "Crop",
+                fields=[
+                    "crop_name", "crop_family", "crop_type", "planting_start_month",
+                    "planting_end_month", "days_to_maturity"
+                ],
+                order_by="crop_name",
+                limit=20
+            )
+        
+        return {
+            "success": True,
+            "garden_plot": garden_plot,
+            "previous_crop": previous_crop or "None",
+            "suggested_crops": suggestions,
+            "avoid_crops": avoid_crops,
+            "rotation_tip": "Rotate crops from different families to prevent soil-borne diseases and pest buildup.",
+            "message": f"Found {len(suggestions)} suggested crops for rotation"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get crop rotation suggestions error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get crop rotation suggestions"
+        }
+
+
+@frappe.whitelist()
+def calculate_succession_planting(crop_name: str, start_date: str, end_date: str) -> Dict[str, Any]:
+    """
+    Calculate succession planting schedule for continuous harvest.
+    
+    Args:
+        crop_name: Name of the crop
+        start_date: Start date for planting (YYYY-MM-DD)
+        end_date: End date for planting (YYYY-MM-DD)
+    
+    Returns:
+        Dictionary with succession planting schedule
+    """
+    try:
+        from datetime import datetime, timedelta
+        from frappe.utils import getdate, add_days
+        
+        crop = frappe.get_doc("Crop", crop_name)
+        
+        if not crop.succession_planting_interval_days or crop.succession_planting_interval_days == 0:
+            return {
+                "success": False,
+                "message": f"{crop_name} is not suitable for succession planting"
+            }
+        
+        start = getdate(start_date)
+        end = getdate(end_date)
+        
+        schedule = []
+        current_date = start
+        planting_number = 1
+        
+        while current_date <= end:
+            harvest_date = add_days(current_date, crop.days_to_maturity) if crop.days_to_maturity else None
+            
+            schedule.append({
+                "planting_number": planting_number,
+                "planting_date": str(current_date),
+                "expected_harvest_date": str(harvest_date) if harvest_date else "Unknown",
+                "days_to_maturity": crop.days_to_maturity or 0
+            })
+            
+            current_date = add_days(current_date, crop.succession_planting_interval_days)
+            planting_number += 1
+        
+        return {
+            "success": True,
+            "crop": crop_name,
+            "succession_interval_days": crop.succession_planting_interval_days,
+            "planting_schedule": schedule,
+            "total_plantings": len(schedule),
+            "message": f"Created succession planting schedule with {len(schedule)} plantings"
+        }
+    except Exception as e:
+        frappe.log_error(f"Calculate succession planting error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to calculate succession planting schedule"
+        }
+
+
+@frappe.whitelist()
+def generate_garden_shopping_list(schedule_name: str) -> Dict[str, Any]:
+    """
+    Generate a shopping list for a garden planting schedule.
+    
+    Args:
+        schedule_name: Name of the Garden Planting Schedule
+    
+    Returns:
+        Dictionary with shopping list items
+    """
+    try:
+        schedule = frappe.get_doc("Garden Planting Schedule", schedule_name)
+        
+        shopping_list = {}
+        
+        for item in schedule.planting_items:
+            crop_key = item.crop
+            if item.variety:
+                crop_key = f"{item.crop} ({item.variety})"
+            
+            if crop_key not in shopping_list:
+                shopping_list[crop_key] = {
+                    "crop": item.crop,
+                    "variety": item.variety or "Standard",
+                    "total_quantity": 0,
+                    "planting_dates": []
+                }
+            
+            shopping_list[crop_key]["total_quantity"] += item.quantity or 1
+            shopping_list[crop_key]["planting_dates"].append(str(item.planting_date))
+        
+        shopping_items = list(shopping_list.values())
+        
+        return {
+            "success": True,
+            "schedule_name": schedule_name,
+            "garden_plot": schedule.garden_plot,
+            "year": schedule.year,
+            "shopping_list": shopping_items,
+            "total_crop_types": len(shopping_items),
+            "message": f"Generated shopping list with {len(shopping_items)} items"
+        }
+    except Exception as e:
+        frappe.log_error(f"Generate shopping list error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate shopping list"
+        }
+
+
+@frappe.whitelist()
+def get_upcoming_garden_tasks(days_ahead: int = 14) -> Dict[str, Any]:
+    """
+    Get upcoming planting and harvest tasks.
+    
+    Args:
+        days_ahead: Number of days to look ahead (default: 14)
+    
+    Returns:
+        Dictionary with upcoming tasks
+    """
+    try:
+        from frappe.utils import getdate, add_days
+        
+        today = getdate()
+        future_date = add_days(today, days_ahead)
+        
+        # Get all active planting schedules
+        schedules = frappe.get_all(
+            "Garden Planting Schedule",
+            fields=["name", "schedule_name", "garden_plot", "year"]
+        )
+        
+        tasks = {
+            "planting": [],
+            "harvest": []
+        }
+        
+        for schedule_info in schedules:
+            schedule = frappe.get_doc("Garden Planting Schedule", schedule_info["name"])
+            
+            for item in schedule.planting_items:
+                # Check planting tasks
+                if item.planting_date and item.status == "Planned":
+                    planting_date = getdate(item.planting_date)
+                    if today <= planting_date <= future_date:
+                        days_until = (planting_date - today).days
+                        tasks["planting"].append({
+                            "schedule": schedule.schedule_name,
+                            "garden_plot": schedule.garden_plot,
+                            "crop": item.crop,
+                            "variety": item.variety,
+                            "date": str(item.planting_date),
+                            "days_until": days_until,
+                            "quantity": item.quantity
+                        })
+                
+                # Check harvest tasks
+                if item.expected_harvest_date and item.status in ["Seeded/Planted", "Growing"]:
+                    harvest_date = getdate(item.expected_harvest_date)
+                    if today <= harvest_date <= future_date:
+                        days_until = (harvest_date - today).days
+                        tasks["harvest"].append({
+                            "schedule": schedule.schedule_name,
+                            "garden_plot": schedule.garden_plot,
+                            "crop": item.crop,
+                            "variety": item.variety,
+                            "date": str(item.expected_harvest_date),
+                            "days_until": days_until,
+                            "quantity": item.quantity
+                        })
+        
+        # Sort by date
+        tasks["planting"].sort(key=lambda x: x["date"])
+        tasks["harvest"].sort(key=lambda x: x["date"])
+        
+        return {
+            "success": True,
+            "days_ahead": days_ahead,
+            "planting_tasks": tasks["planting"],
+            "harvest_tasks": tasks["harvest"],
+            "total_tasks": len(tasks["planting"]) + len(tasks["harvest"]),
+            "message": f"Found {len(tasks['planting'])} planting and {len(tasks['harvest'])} harvest tasks"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get upcoming garden tasks error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get upcoming garden tasks"
         }
