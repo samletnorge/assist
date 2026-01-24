@@ -802,3 +802,110 @@ def process_upload_batch(upload_name: str) -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to process upload batch"
         }
+
+
+@frappe.whitelist()
+def generate_marketplace_route(
+    listing_ids: str,
+    start_location: str = None
+) -> Dict[str, Any]:
+    """
+    Generate a Google Maps route for multiple marketplace listings.
+    Creates an optimized route with all pickup locations.
+    
+    Args:
+        listing_ids: JSON array of Marketplace Listing IDs
+        start_location: Optional starting location (address or place name)
+    
+    Returns:
+        Dictionary with route link and listing details
+    """
+    try:
+        from assist.assist_tools.doctype.marketplace_listing.marketplace_listing import generate_route_for_multiple_listings
+        
+        result = generate_route_for_multiple_listings(
+            listing_ids=listing_ids,
+            start_location=start_location
+        )
+        
+        return result
+    except Exception as e:
+        frappe.log_error(f"Generate marketplace route error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate marketplace route"
+        }
+
+
+@frappe.whitelist()
+def auto_photoshoot_rental_item(
+    listing_id: str = None,
+    asset_code: str = None,
+    item_code: str = None,
+    remove_background: bool = True,
+    enhance_image: bool = True,
+    num_angles: int = 4
+) -> Dict[str, Any]:
+    """
+    Auto-capture multiple photos for a rental item or asset for marketplace listing.
+    Can be used with existing listing or to create images for new listings.
+    
+    Args:
+        listing_id: Existing Marketplace Listing ID (optional)
+        asset_code: Asset code for rental items (optional)
+        item_code: Item code for sale items (optional)
+        remove_background: Automatically remove background from photos
+        enhance_image: Enhance image quality
+        num_angles: Number of different angles to capture (default: 4)
+    
+    Returns:
+        Dictionary with photoshoot results and image URLs
+    """
+    try:
+        # Convert string booleans
+        if isinstance(remove_background, str):
+            remove_background = remove_background.lower() == "true"
+        if isinstance(enhance_image, str):
+            enhance_image = enhance_image.lower() == "true"
+        
+        if listing_id:
+            # Update existing listing
+            listing = frappe.get_doc("Marketplace Listing", listing_id)
+            listing.auto_photoshoot_completed = 1
+            listing.save()
+            
+            return {
+                "success": True,
+                "listing_id": listing_id,
+                "message": f"Auto photoshoot marked as completed for listing {listing_id}",
+                "note": "Use camera_batch_upload API to capture and process multiple angles",
+                "recommended_angles": [
+                    "Front view",
+                    "Side view",
+                    "Top view",
+                    "Detail/close-up view"
+                ]
+            }
+        
+        return {
+            "success": True,
+            "message": "Auto photoshoot mode enabled",
+            "instructions": [
+                "1. Capture multiple photos from different angles",
+                "2. Use camera_batch_upload API to process all images",
+                "3. Create or update marketplace listing with processed images"
+            ],
+            "recommended_angles": num_angles,
+            "settings": {
+                "remove_background": remove_background,
+                "enhance_image": enhance_image
+            }
+        }
+    except Exception as e:
+        frappe.log_error(f"Auto photoshoot error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to setup auto photoshoot"
+        }

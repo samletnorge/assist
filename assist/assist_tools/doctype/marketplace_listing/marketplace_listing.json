@@ -20,6 +20,19 @@
   "listing_url",
   "posted_on",
   "expires_on",
+  "section_break_location",
+  "pickup_location",
+  "pickup_address",
+  "pickup_city",
+  "pickup_postal_code",
+  "column_break_location",
+  "seller_contact",
+  "seller_phone",
+  "gmaps_route_link",
+  "section_break_packaging",
+  "packaging_status",
+  "packaging_notes",
+  "auto_photoshoot_completed",
   "section_break_2",
   "images"
  ],
@@ -102,6 +115,74 @@
    "fieldname": "expires_on",
    "fieldtype": "Date",
    "label": "Expires On"
+  },
+  {
+   "fieldname": "section_break_location",
+   "fieldtype": "Section Break",
+   "label": "Pickup Location"
+  },
+  {
+   "fieldname": "pickup_location",
+   "fieldtype": "Data",
+   "label": "Pickup Location"
+  },
+  {
+   "fieldname": "pickup_address",
+   "fieldtype": "Data",
+   "label": "Pickup Address"
+  },
+  {
+   "fieldname": "pickup_city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "pickup_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "column_break_location",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "seller_contact",
+   "fieldtype": "Data",
+   "label": "Seller Contact Name"
+  },
+  {
+   "fieldname": "seller_phone",
+   "fieldtype": "Data",
+   "label": "Seller Phone"
+  },
+  {
+   "fieldname": "gmaps_route_link",
+   "fieldtype": "Data",
+   "label": "Google Maps Route Link",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_packaging",
+   "fieldtype": "Section Break",
+   "label": "Packaging & Photos"
+  },
+  {
+   "fieldname": "packaging_status",
+   "fieldtype": "Select",
+   "label": "Packaging Status",
+   "options": "\nPending\nIn Progress\nCompleted",
+   "default": "Pending"
+  },
+  {
+   "fieldname": "packaging_notes",
+   "fieldtype": "Small Text",
+   "label": "Packaging Notes"
+  },
+  {
+   "fieldname": "auto_photoshoot_completed",
+   "fieldtype": "Check",
+   "label": "Auto Photoshoot Completed",
+   "default": 0
   },
   {
    "fieldname": "section_break_2",
