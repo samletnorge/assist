@@ -802,3 +802,50 @@ def process_upload_batch(upload_name: str) -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to process upload batch"
         }
+
+
+@frappe.whitelist()
+def run_marketplace_hustle_routine() -> Dict[str, Any]:
+    """
+    Manually trigger the marketplace hustle routine.
+    
+    This checks all active saved marketplace searches and matches new items
+    with Material Requests and Tasks.
+    
+    Returns:
+        Dictionary with processing results
+    """
+    try:
+        from assist.utils.marketplace_hustle import check_marketplace_searches
+        
+        result = check_marketplace_searches()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Marketplace hustle routine error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run marketplace hustle routine"
+        }
+
+
+@frappe.whitelist()
+def get_marketplace_hustle_status() -> Dict[str, Any]:
+    """
+    Get the current status of the marketplace hustle routine.
+    
+    Returns:
+        Dictionary with status information including active searches and recent activity
+    """
+    try:
+        from assist.utils.marketplace_hustle import get_hustle_routine_status
+        
+        result = get_hustle_routine_status()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Get marketplace hustle status error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get marketplace hustle routine status"
+        }
