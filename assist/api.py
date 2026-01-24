@@ -9,6 +9,21 @@ import json
 from typing import Dict, Any
 
 
+def _parse_bool(value):
+    """
+    Helper function to parse boolean values from string parameters.
+    
+    Args:
+        value: Value to parse (can be bool, str, or other)
+    
+    Returns:
+        Boolean value
+    """
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return bool(value)
+
+
 @frappe.whitelist()
 def remove_image_background(image_data: str, enhance: bool = True, use_altlokalt_api: bool = False) -> Dict[str, Any]:
     """
@@ -25,10 +40,8 @@ def remove_image_background(image_data: str, enhance: bool = True, use_altlokalt
     try:
         from assist.utils.image_processing import process_camera_image
         
-        if isinstance(enhance, str):
-            enhance = enhance.lower() == "true"
-        if isinstance(use_altlokalt_api, str):
-            use_altlokalt_api = use_altlokalt_api.lower() == "true"
+        enhance = _parse_bool(enhance)
+        use_altlokalt_api = _parse_bool(use_altlokalt_api)
         
         processed_image = process_camera_image(
             image_data,
@@ -124,10 +137,8 @@ def quick_add_item(
         from assist.mcp_server.server import quick_add_item_from_camera
         
         # Convert string booleans
-        if isinstance(remove_background, str):
-            remove_background = remove_background.lower() == "true"
-        if isinstance(enhance_image_quality, str):
-            enhance_image_quality = enhance_image_quality.lower() == "true"
+        remove_background = _parse_bool(remove_background)
+        enhance_image_quality = _parse_bool(enhance_image_quality)
         if valuation_rate:
             valuation_rate = float(valuation_rate)
         
@@ -207,8 +218,7 @@ def compare_prices(
     try:
         from assist.mcp_server.server import compare_vendor_prices
         
-        if isinstance(search_prisjakt, str):
-            search_prisjakt = search_prisjakt.lower() == "true"
+        search_prisjakt = _parse_bool(search_prisjakt)
         
         result = compare_vendor_prices(
             item_name=item_name,
@@ -398,8 +408,7 @@ def import_github_repos(
     try:
         from assist.mcp_server.server import import_github_repos_as_assets
         
-        if isinstance(import_as_assets, str):
-            import_as_assets = import_as_assets.lower() == "true"
+        import_as_assets = _parse_bool(import_as_assets)
         
         result = import_github_repos_as_assets(
             username=username,
@@ -443,10 +452,8 @@ def find_warehouses(
     try:
         from assist.mcp_server.server import find_warehouses_on_finn
         
-        if isinstance(add_to_erpnext, str):
-            add_to_erpnext = add_to_erpnext.lower() == "true"
-        if isinstance(phone_control, str):
-            phone_control = phone_control.lower() == "true"
+        add_to_erpnext = _parse_bool(add_to_erpnext)
+        phone_control = _parse_bool(phone_control)
         
         result = find_warehouses_on_finn(
             location=location,
@@ -752,10 +759,8 @@ def camera_batch_upload(
         from assist.assist_tools.doctype.stock_camera_upload.stock_camera_upload import quick_batch_upload
         
         # Convert string booleans
-        if isinstance(remove_background, str):
-            remove_background = remove_background.lower() == "true"
-        if isinstance(enhance_image, str):
-            enhance_image = enhance_image.lower() == "true"
+        remove_background = _parse_bool(remove_background)
+        enhance_image = _parse_bool(enhance_image)
         if valuation_rate:
             valuation_rate = float(valuation_rate)
         
@@ -864,10 +869,8 @@ def auto_photoshoot_rental_item(
     """
     try:
         # Convert string booleans
-        if isinstance(remove_background, str):
-            remove_background = remove_background.lower() == "true"
-        if isinstance(enhance_image, str):
-            enhance_image = enhance_image.lower() == "true"
+        remove_background = _parse_bool(remove_background)
+        enhance_image = _parse_bool(enhance_image)
         
         if listing_id:
             # Update existing listing

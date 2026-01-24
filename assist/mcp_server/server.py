@@ -932,7 +932,7 @@ def orchestrate_pickup_route(
             
             route_plan["listings"].append({
                 "listing_id": listing_id,
-                "item": listing.item_code or listing.asset_code,
+                "item": listing.item_code if listing.listing_type == "Sale" else listing.asset_code,
                 "location": location_str,
                 "seller_contact": listing.seller_contact,
                 "seller_phone": listing.seller_phone,

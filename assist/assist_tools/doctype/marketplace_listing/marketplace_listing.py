@@ -141,8 +141,7 @@ def generate_route_for_multiple_listings(listing_ids, start_location=None):
     else:
         # Last waypoint is destination, rest are waypoints
         params['destination'] = waypoints[-1]
-        if len(waypoints) > 1:
-            params['waypoints'] = '|'.join(waypoints[:-1])
+        params['waypoints'] = '|'.join(waypoints[:-1])
     
     route_link = f"https://www.google.com/maps/dir/?{urlencode(params)}"
     

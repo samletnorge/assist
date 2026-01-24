@@ -170,7 +170,7 @@
    "fieldname": "packaging_status",
    "fieldtype": "Select",
    "label": "Packaging Status",
-   "options": "\nPending\nIn Progress\nCompleted",
+   "options": "Pending\nIn Progress\nCompleted",
    "default": "Pending"
   },
   {
