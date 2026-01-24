@@ -1,0 +1,216 @@
+[
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Enova Varmepumpe til Bolig",
+    "program_code": "ENV-VARMEPUMP",
+    "provider": "Enova",
+    "program_type": "Støtte",
+    "category": "Energi",
+    "status": "Active",
+    "short_description": "Støtte til installasjon av varmepumpe i privatboliger for energieffektivisering.",
+    "full_description": "<p>Enova gir støtte til privatpersoner som installerer varmepumpe i boligen sin. Dette bidrar til redusert energiforbruk og lavere strømregning.</p><p>Støtten dekker deler av installasjonskostnadene og varierer basert på type varmepumpe.</p>",
+    "external_url": "https://www.enova.no/privat/alle-energitiltak/varmepumper/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 0,
+    "eligible_for_housing": 1,
+    "eligible_for_farm": 0,
+    "support_amount_min": 5000,
+    "support_amount_max": 15000,
+    "currency": "NOK",
+    "requirements": [
+      {
+        "requirement_title": "Må være boligeier",
+        "requirement_description": "Søker må eie boligen hvor varmepumpen skal installeres",
+        "is_mandatory": 1
+      },
+      {
+        "requirement_title": "Profesjonell installasjon",
+        "requirement_description": "Varmepumpen må installeres av godkjent installatør",
+        "is_mandatory": 1
+      }
+    ],
+    "required_documents": [
+      {
+        "document_name": "Faktura fra installatør",
+        "document_description": "Kopi av faktura som viser type varmepumpe og installasjonskostnader",
+        "is_mandatory": 1,
+        "document_format": "PDF"
+      },
+      {
+        "document_name": "Dokumentasjon på energimerking",
+        "document_description": "Energimerking av varmepumpen",
+        "is_mandatory": 1,
+        "document_format": "PDF"
+      }
+    ]
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Enova Solceller til Bolig",
+    "program_code": "ENV-SOLCELLER",
+    "provider": "Enova",
+    "program_type": "Støtte",
+    "category": "Energi",
+    "status": "Active",
+    "short_description": "Støtte til installasjon av solcellepanel på bolig for produksjon av fornybar energi.",
+    "full_description": "<p>Enova tilbyr støtte til privatpersoner som installerer solcellepanel på bolig. Dette bidrar til økt fornybar energiproduksjon og reduserte strømkostnader.</p>",
+    "external_url": "https://www.enova.no/privat/alle-energitiltak/solceller/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 0,
+    "eligible_for_housing": 1,
+    "eligible_for_farm": 0,
+    "support_amount_min": 7500,
+    "support_amount_max": 20000,
+    "currency": "NOK",
+    "percentage_coverage": 20,
+    "requirements": [
+      {
+        "requirement_title": "Minimum kapasitet",
+        "requirement_description": "Solcelleanlegget må ha minimum 5 kWp installert effekt",
+        "is_mandatory": 1
+      }
+    ],
+    "required_documents": [
+      {
+        "document_name": "Installasjonsbevis",
+        "document_description": "Bevis fra autorisert elektriker på utført installasjon",
+        "is_mandatory": 1,
+        "document_format": "PDF"
+      }
+    ]
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Enova Støtte til Energieffektivisering i Bedrift",
+    "program_code": "ENV-ENERGIBEDRIFT",
+    "provider": "Enova",
+    "program_type": "Støtte",
+    "category": "Energi",
+    "status": "Active",
+    "short_description": "Støtte til bedrifter for gjennomføring av energieffektiviseringstiltak.",
+    "full_description": "<p>Enova tilbyr støtte til næringslivet for energieffektiviseringstiltak som reduserer energiforbruket betydelig.</p>",
+    "external_url": "https://www.enova.no/bedrift/",
+    "eligible_for_private_person": 0,
+    "eligible_for_company": 1,
+    "eligible_for_housing": 0,
+    "eligible_for_farm": 0,
+    "support_amount_min": 50000,
+    "support_amount_max": 5000000,
+    "currency": "NOK",
+    "percentage_coverage": 40,
+    "requirements": [
+      {
+        "requirement_title": "Energisparepotensialet må være dokumentert",
+        "requirement_description": "Tiltaket må dokumentere betydelig energisparing",
+        "is_mandatory": 1
+      }
+    ]
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Husbanken Grunnlån",
+    "program_code": "HUS-GRUNNLÅN",
+    "provider": "Husbanken",
+    "program_type": "Lån",
+    "category": "Bygg og oppgradering",
+    "status": "Active",
+    "short_description": "Rimelige lån til etablering, utbedring, og tilpasning av bolig.",
+    "full_description": "<p>Husbanken tilbyr grunnlån til etablering i boligmarkedet, utbedring av bolig, og tilpasning av bolig til personer med nedsatt funksjonsevne.</p>",
+    "external_url": "https://husbanken.no/lan/grunnlan/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 0,
+    "eligible_for_housing": 1,
+    "eligible_for_farm": 0,
+    "support_amount_max": 3000000,
+    "currency": "NOK"
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Innovasjon Norge Etablererstipend",
+    "program_code": "INN-ETABLERER",
+    "provider": "Innovasjon Norge",
+    "program_type": "Tilskudd",
+    "category": "Næring",
+    "status": "Active",
+    "short_description": "Tilskudd til nystartede bedrifter for å dekke levekostnader i oppstartsfasen.",
+    "full_description": "<p>Etablererstipend er et tilskudd som skal dekke deler av grunnleggende levekostnader i oppstartsfasen av en bedrift.</p>",
+    "external_url": "https://www.innovasjonnorge.no/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 1,
+    "eligible_for_housing": 0,
+    "eligible_for_farm": 0,
+    "support_amount_max": 250000,
+    "currency": "NOK"
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Landsbruksdirektoratet Produksjonstilskudd",
+    "program_code": "LAN-PRODUKSJON",
+    "provider": "Landsbruksdirektoratet",
+    "program_type": "Tilskudd",
+    "category": "Landbruk",
+    "status": "Active",
+    "short_description": "Tilskudd til aktive gårdbrukere for å opprettholde matproduksjon og kulturlandskap.",
+    "full_description": "<p>Produksjonstilskudd gis til aktive gårdbrukere for å sikre matproduksjon og ivareta kulturlandskapet.</p>",
+    "external_url": "https://www.landbruksdirektoratet.no/",
+    "eligible_for_private_person": 0,
+    "eligible_for_company": 1,
+    "eligible_for_housing": 0,
+    "eligible_for_farm": 1
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Skatteetaten Boligsparing for Ungdom (BSU)",
+    "program_code": "SKA-BSU",
+    "provider": "Skatteetaten",
+    "program_type": "Fradrag",
+    "category": "Annet",
+    "status": "Active",
+    "short_description": "Skattefradrag for ungdom som sparer til egen bolig.",
+    "full_description": "<p>BSU (Boligsparing for ungdom) gir skattefradrag på inntil 5 000 kr per år for ungdom under 34 år som sparer til boligkjøp.</p>",
+    "external_url": "https://www.skatteetaten.no/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 0,
+    "eligible_for_housing": 1,
+    "eligible_for_farm": 0,
+    "support_amount_max": 5000,
+    "currency": "NOK",
+    "percentage_coverage": 20
+  },
+  {
+    "doctype": "Norwegian Support Program",
+    "program_name": "Kommune Byggesøknad",
+    "program_code": "KOM-BYGGESØKNAD",
+    "provider": "Kommune",
+    "program_type": "Støtte",
+    "category": "Bygg og oppgradering",
+    "status": "Active",
+    "short_description": "Søknad om tillatelse til bygging, ombygging eller rivning av bygninger.",
+    "full_description": "<p>Alle bygge- og rivetiltak som krever tillatelse må søkes hos kommunen. Kommunen behandler søknaden i henhold til plan- og bygningsloven.</p>",
+    "external_url": "https://www.dibk.no/",
+    "eligible_for_private_person": 1,
+    "eligible_for_company": 1,
+    "eligible_for_housing": 1,
+    "eligible_for_farm": 1,
+    "requirements": [
+      {
+        "requirement_title": "Situasjonsplan",
+        "requirement_description": "Tegning som viser byggets plassering på eiendommen",
+        "is_mandatory": 1
+      },
+      {
+        "requirement_title": "Fasadetegninger",
+        "requirement_description": "Tegninger av alle byggets fasader",
+        "is_mandatory": 1
+      }
+    ],
+    "required_documents": [
+      {
+        "document_name": "Nabovarsel",
+        "document_description": "Kvittering for at naboer er varslet om tiltaket",
+        "is_mandatory": 1,
+        "document_format": "PDF"
+      }
+    ]
+  }
+]

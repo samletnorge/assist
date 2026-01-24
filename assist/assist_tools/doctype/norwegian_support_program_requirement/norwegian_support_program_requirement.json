@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "requirement_title",
+  "requirement_description",
+  "is_mandatory"
+ ],
+ "fields": [
+  {
+   "fieldname": "requirement_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Requirement Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "requirement_description",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_mandatory",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Mandatory"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Assist Tools",
+ "name": "Norwegian Support Program Requirement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

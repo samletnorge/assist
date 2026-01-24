@@ -1878,6 +1878,200 @@ def submit_lyngdal_kommune_application(kommune: str, application_type: str, data
         }
 
 
+# Norwegian Support Programs Tools
+@mcp.tool()
+def get_support_programs(
+    entity_type: Optional[str] = None,
+    provider: Optional[str] = None,
+    program_type: Optional[str] = None,
+    category: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get list of Norwegian support programs, grants, and deductions (støtte og fradrag).
+    
+    Search and retrieve information about available financial support programs in Norway
+    for different entities including private persons, companies, housing projects, and farms.
+    
+    Args:
+        entity_type: Filter by eligible entity type:
+                    - "private_person": Support for individuals
+                    - "company": Support for businesses
+                    - "housing": Support for housing/residential projects (bolig)
+                    - "farm": Support for farms and agriculture (gård)
+        provider: Filter by provider organization:
+                 - "Enova": Energy and climate support programs
+                 - "Kommune": Municipal support and permits
+                 - "Husbanken": Housing bank loans and grants
+                 - "Innovasjon Norge": Business innovation support
+                 - "Skatteetaten": Tax deductions (fradrag)
+                 - "Landsbruksdirektoratet": Agricultural support
+        program_type: Filter by program type:
+                     - "Støtte": Grants and support
+                     - "Fradrag": Tax deductions
+                     - "Lån": Loans
+                     - "Tilskudd": Subsidies
+        category: Filter by category:
+                 - "Energi": Energy efficiency and renewable energy
+                 - "Bygg og oppgradering": Building and renovation
+                 - "Klima og miljø": Climate and environment
+                 - "Landbruk": Agriculture
+                 - "Næring": Business and commerce
+    
+    Returns:
+        Dictionary with list of matching support programs including:
+        - Program name and description
+        - Provider and eligibility requirements
+        - Support amounts and coverage percentages
+        - Application deadlines
+        - Required documents
+    
+    Use cases:
+    - Find all Enova støtte programs for private persons
+    - Search for housing renovation grants (boligoppgradering)
+    - Find tax deductions available for companies
+    - Get farm support programs from Landsbruksdirektoratet
+    - Find building permit requirements for kommune
+    """
+    try:
+        import frappe
+        from assist.api import get_norwegian_support_programs
+        
+        result = get_norwegian_support_programs(
+            entity_type=entity_type,
+            provider=provider,
+            program_type=program_type,
+            category=category,
+            status="Active"
+        )
+        
+@mcp.tool()
+def run_marketplace_hustle_routine() -> Dict[str, Any]:
+    """
+    Trigger the marketplace hustle routine to check saved marketplace searches.
+    
+    This function checks all active saved marketplace searches (finn.no, Facebook Marketplace)
+    for new items matching building materials, pallets, tracks, or other needed items.
+    When new items are found, it checks if they match Material Requests or Tasks,
+    and creates notifications for matches.
+    
+    Returns:
+        Dictionary with processing results including searches processed, items found, and matches created
+    """
+    try:
+        from assist.utils.marketplace_hustle import check_marketplace_searches
+        
+        result = check_marketplace_searches()
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run marketplace hustle routine"
+        }
+
+
+@mcp.tool()
+def get_enova_support_programs() -> Dict[str, Any]:
+    """
+    Get all active Enova support programs (Enova støtte).
+    
+    Retrieves comprehensive information about Enova's support programs for:
+    - Energy efficiency improvements (varmepumper, isolasjon)
+    - Renewable energy installations (solceller, varmeanlegg)
+    - Business energy optimization
+    - Sustainable transportation
+    
+    Enova is the Norwegian government enterprise responsible for promoting
+    environmentally friendly production and consumption of energy.
+    
+    Returns:
+        Dictionary with detailed information about all active Enova programs including:
+        - Program names and descriptions
+        - Eligibility criteria
+        - Support amounts (minimum and maximum)
+        - Coverage percentages
+        - Requirements and documentation needed
+        - Application deadlines
+        - External links to official Enova pages
+    
+    Use cases:
+    - Find heat pump (varmepumpe) support for homes
+    - Get solar panel (solceller) installation grants
+    - Check business energy efficiency support
+    - Find EV charging station support
+    """
+    try:
+        import frappe
+        from assist.api import get_enova_support_programs
+        
+        result = get_enova_support_programs(status="Active")
+        
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve Enova programs"
+        }
+
+
+@mcp.tool()
+def search_norwegian_support(search_term: str) -> Dict[str, Any]:
+    """
+    Search Norwegian support programs by keyword.
+    
+    Searches across program names, descriptions, and categories to find
+    relevant support programs, grants, and deductions.
+    
+    Args:
+        search_term: Keyword or phrase to search for (in Norwegian or English)
+                    Examples: "varmepumpe", "solar", "byggesøknad", "BSU",
+                             "landbruk", "startup", "bolig"
+    
+    Returns:
+        Dictionary with list of matching support programs
+    
+    Use cases:
+    - Find specific support types: "varmepumpe", "solceller"
+    - Search for general topics: "energi", "bygg", "landbruk"
+    - Look for specific programs: "BSU", "etablererstipend"
+    - Find building related support: "byggesøknad", "oppussing"
+    """
+    try:
+        import frappe
+        from assist.api import search_support_programs
+        
+        result = search_support_programs(
+            search_term=search_term,
+            status="Active"
+        )
+        
+def get_marketplace_hustle_status() -> Dict[str, Any]:
+    """
+    Get the current status of the marketplace hustle routine.
+    
+    Returns statistics about saved marketplace searches including:
+    - Total number of saved searches
+    - Number of active searches
+    - Recent search activity and results
+    
+    Returns:
+        Dictionary with status information
+    """
+    try:
+        from assist.utils.marketplace_hustle import get_hustle_routine_status
+        
+        result = get_hustle_routine_status()
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+
+            "message": "Failed to get marketplace hustle routine status"
+        }
+
+
 def run_server(transport: str = "stdio"):
     """
     Run the MCP server with the specified transport.

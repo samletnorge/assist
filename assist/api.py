@@ -15,7 +15,7 @@ def _parse_bool(value):
     
     Args:
         value: Value to parse (can be bool, str, or other)
-    
+      `
     Returns:
         Boolean value
     """
@@ -840,6 +840,196 @@ def generate_marketplace_route(
             "success": False,
             "error": str(e),
             "message": "Failed to generate marketplace route"
+
+def get_norwegian_support_programs(
+    entity_type: str = None,
+    provider: str = None,
+    program_type: str = None,
+    category: str = None,
+    status: str = "Active"
+) -> Dict[str, Any]:
+    """
+    Get list of Norwegian support programs (støtte og fradrag).
+    
+    Args:
+        entity_type: Filter by eligibility - "private_person", "company", "housing", "farm"
+        provider: Filter by provider (e.g., "Enova", "Kommune", "Skatteetaten")
+        program_type: Filter by type - "Støtte", "Fradrag", "Lån", "Garantier", "Tilskudd"
+        category: Filter by category (e.g., "Energi", "Bygg og oppgradering")
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of matching support programs
+    """
+    try:
+        filters = {}
+        
+        if status:
+            filters["status"] = status
+        if provider:
+            filters["provider"] = provider
+        if program_type:
+            filters["program_type"] = program_type
+        if category:
+            filters["category"] = category
+        
+        # Add entity type filter if specified
+        if entity_type:
+            entity_field_map = {
+                "private_person": "eligible_for_private_person",
+                "company": "eligible_for_company",
+                "housing": "eligible_for_housing",
+                "farm": "eligible_for_farm"
+            }
+            if entity_type in entity_field_map:
+                filters[entity_field_map[entity_type]] = 1
+        
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters=filters,
+            fields=[
+                "name", "program_name", "program_code", "provider", "program_type",
+                "category", "status", "short_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "percentage_coverage", "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+        )
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "filters_applied": filters,
+            "message": f"Found {len(programs)} support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get support programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve support programs"
+        }
+
+
+@frappe.whitelist()
+def get_enova_support_programs(status: str = "Active") -> Dict[str, Any]:
+    """
+    Get all Enova support programs (Enova støtte).
+    
+    Args:
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of Enova support programs
+    """
+    try:
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters={
+                "provider": "Enova",
+                "status": status
+            },
+            fields=[
+                "name", "program_name", "program_code", "program_type",
+                "category", "short_description", "full_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "percentage_coverage", "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+        )
+        
+        # Get detailed information for each program
+        detailed_programs = []
+        for prog in programs:
+            program_doc = frappe.get_doc("Norwegian Support Program", prog.name)
+            prog_dict = prog.as_dict()
+            prog_dict["requirements"] = [r.as_dict() for r in program_doc.requirements]
+            prog_dict["required_documents"] = [d.as_dict() for d in program_doc.required_documents]
+            detailed_programs.append(prog_dict)
+        
+        return {
+            "success": True,
+            "programs": detailed_programs,
+            "count": len(detailed_programs),
+            "provider": "Enova",
+            "message": f"Found {len(detailed_programs)} Enova support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get Enova programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve Enova programs"
+def save_bruktdel_search(search_query: str, asset_code: str = None, active: bool = True) -> Dict[str, Any]:
+    """
+    Save a new bruktdel.no search for tracking car parts.
+    
+    Args:
+        search_query: The search term to look for on bruktdel.no
+        asset_code: Optional asset code (car/vehicle) to link this search to
+        active: Whether the search should be active (default: True)
+    
+    Returns:
+        Dictionary with the created search record
+    """
+    try:
+        # Convert string bool to actual bool
+        if isinstance(active, str):
+            active = active.lower() == "true"
+        
+        # Create the saved search
+        doc = frappe.get_doc({
+            "doctype": "Saved Marketplace Search",
+            "user": frappe.session.user,
+            "search_query": search_query,
+            "marketplace": "bruktdel.no",
+            "search_type": "purchase_request",
+            "asset_code": asset_code,
+            "active": active,
+            "last_checked": None,  # Will be set when first check is performed
+            "results_found": 0
+        })
+        doc.insert()
+        frappe.db.commit()
+        
+        return {
+            "success": True,
+            "search_name": doc.name,
+            "message": f"Saved bruktdel.no search for: {search_query}"
+        }
+    except Exception as e:
+        frappe.log_error(f"Save bruktdel.no search error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to save bruktdel.no search"
+        }
+def run_marketplace_hustle_routine() -> Dict[str, Any]:
+    """
+    Manually trigger the marketplace hustle routine.
+    
+    This checks all active saved marketplace searches and matches new items
+    with Material Requests and Tasks.
+    
+    Returns:
+        Dictionary with processing results
+    """
+    try:
+        from assist.utils.marketplace_hustle import check_marketplace_searches
+        
+        result = check_marketplace_searches()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Marketplace hustle routine error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to run marketplace hustle routine"         
         }
 
 
@@ -911,4 +1101,367 @@ def auto_photoshoot_rental_item(
             "success": False,
             "error": str(e),
             "message": "Failed to setup auto photoshoot"
+        }
+ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
+    """
+    Get kommune (municipality) support programs.
+    
+    Args:
+        kommune: Optional specific kommune name
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of kommune support programs
+    """
+    try:
+        filters = {
+            "provider": "Kommune",
+            "status": status
+        }
+        
+        programs = frappe.get_all(
+            "Norwegian Support Program",
+            filters=filters,
+            fields=[
+                "name", "program_name", "program_code", "program_type",
+                "category", "short_description", "external_url",
+                "support_amount_min", "support_amount_max", "currency",
+                "application_deadline",
+                "eligible_for_private_person", "eligible_for_company",
+                "eligible_for_housing", "eligible_for_farm"
+            ],
+            order_by="program_name"
+def get_car_assets() -> Dict[str, Any]:
+    """
+    Get all car/vehicle assets from the system.
+    
+    This function retrieves assets that are transport vehicles (chart of account 1204)
+    and suitable for tracking parts on bruktdel.no.
+    
+    Returns:
+        Dictionary with list of car assets
+    """
+    try:
+        # Get assets that are transport vehicles (account code 1204)
+        # Based on the existing get_rental_eligible_assets pattern
+        # Using broad category filter - can be made configurable via Site Config if needed
+        assets = frappe.get_all(
+            "Asset",
+            filters={
+                # Match categories containing "vehicle", "car", "transport", etc.
+                # To customize, set 'car_asset_categories' in Site Config
+                "asset_category": ["like", "%vehicle%"],
+                "status": ["in", ["In Use", "Partially Depreciated", "Fully Depreciated"]]
+            },
+            fields=["name", "asset_name", "asset_category", "item_name", "status"],
+            order_by="asset_name asc")
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "provider": "Kommune",
+            "message": f"Found {len(programs)} kommune support programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune programs"
+            "assets": assets,
+            "count": len(assets)
+        }
+    except Exception as e:
+        frappe.log_error(f"Get car assets error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get car assets"
+        
+        }
+        
+
+
+@frappe.whitelist()
+def search_support_programs(search_term: str, status: str = "Active") -> Dict[str, Any]:
+    """
+    Search Norwegian support programs by keyword.
+    
+    Args:
+        search_term: Keyword to search in program name and description
+        status: Filter by status (default: "Active")
+    
+    Returns:
+        Dictionary with list of matching support programs
+    """
+    try:
+        # Search in program name and descriptions
+        programs = frappe.db.sql("""
+            SELECT 
+                name, program_name, program_code, provider, program_type,
+                category, status, short_description, external_url,
+                support_amount_min, support_amount_max, currency,
+                eligible_for_private_person, eligible_for_company,
+                eligible_for_housing, eligible_for_farm
+            FROM `tabNorwegian Support Program`
+            WHERE status = %(status)s
+            AND (
+                program_name LIKE %(search)s
+                OR short_description LIKE %(search)s
+                OR full_description LIKE %(search)s
+                OR category LIKE %(search)s
+            )
+            ORDER BY program_name
+        """, {
+            "status": status,
+            "search": f"%{search_term}%"
+        }, as_dict=True)
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "search_term": search_term,
+            "message": f"Found {len(programs)} matching programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Search support programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to search support programs"
+        }
+          
+def get_bruktdel_searches(asset_code: str = None, active_only: bool = True) -> Dict[str, Any]:
+    """
+    Get saved bruktdel.no searches, optionally filtered by asset.
+    
+    Args:
+        asset_code: Optional asset code to filter searches
+        active_only: If True, only return active searches (default: True)
+    
+    Returns:
+        Dictionary with list of saved searches
+    """
+    try:
+        # Convert string bool to actual bool
+        if isinstance(active_only, str):
+            active_only = active_only.lower() == "true"
+        
+        # Build filters
+        filters = {
+            "marketplace": "bruktdel.no"
+        }
+        
+        if active_only:
+            filters["active"] = 1
+            
+        if asset_code:
+            filters["asset_code"] = asset_code
+        
+        # Get the searches
+        searches = frappe.get_all(
+            "Saved Marketplace Search",
+            filters=filters,
+            fields=["name", "search_query", "asset_code", "active", "last_checked", "results_found", "user"],
+            order_by="last_checked desc"
+        )
+        
+        return {
+            "success": True,
+            "searches": searches,
+            "count": len(searches)
+        }
+    except Exception as e:
+        frappe.log_error(f"Get bruktdel.no searches error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get bruktdel.no searches"    
+        }
+
+
+@frappe.whitelist()
+def get_kommune_newsletters(
+    kommune: str = None,
+    is_highlighted: bool = None,
+    category: str = None,
+    status: str = "Published",
+    limit: int = 20
+) -> Dict[str, Any]:
+    """
+    Get kommune newsletter articles and announcements.
+    
+    Args:
+        kommune: Filter by specific kommune name (optional)
+        is_highlighted: Filter by highlighted status (optional)
+        category: Filter by category (optional)
+        status: Filter by status (default: "Published")
+        limit: Maximum number of articles to return (default: 20)
+    
+    Returns:
+        Dictionary with list of newsletter articles
+    """
+    try:
+        filters = {"status": status}
+        
+        if kommune:
+            filters["kommune"] = kommune
+        if is_highlighted is not None:
+            if isinstance(is_highlighted, str):
+                is_highlighted = is_highlighted.lower() == "true"
+            filters["is_highlighted"] = 1 if is_highlighted else 0
+        if category:
+            filters["category"] = category
+        
+        newsletters = frappe.get_all(
+            "Kommune Newsletter",
+            filters=filters,
+            fields=[
+                "name", "kommune", "newsletter_date", "title", "summary",
+                "category", "is_highlighted", "source_url", "tags"
+            ],
+            order_by="newsletter_date desc, is_highlighted desc",
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "newsletters": newsletters,
+            "count": len(newsletters),
+            "filters_applied": filters,
+            "message": f"Found {len(newsletters)} newsletter articles"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune newsletters error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune newsletters"
+        }
+
+
+@frappe.whitelist()
+def get_highlighted_kommune_news(kommune: str = None, limit: int = 10) -> Dict[str, Any]:
+    """
+    Get highlighted kommune news articles.
+    
+    Args:
+        kommune: Optional specific kommune name
+        limit: Maximum number of articles to return (default: 10)
+    
+    Returns:
+        Dictionary with list of highlighted news articles
+    """
+    try:
+        filters = {
+            "is_highlighted": 1,
+            "status": "Published"
+        }
+        
+        if kommune:
+            filters["kommune"] = kommune
+        
+        newsletters = frappe.get_all(
+            "Kommune Newsletter",
+            filters=filters,
+            fields=[
+                "name", "kommune", "newsletter_date", "title", "summary",
+                "category", "source_url", "tags", "full_content"
+            ],
+            order_by="newsletter_date desc",
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "newsletters": newsletters,
+            "count": len(newsletters),
+            "kommune": kommune or "All",
+            "message": f"Found {len(newsletters)} highlighted news articles"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get highlighted news error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve highlighted news"
+        }
+def trigger_bruktdel_check(search_name: str = None) -> Dict[str, Any]:
+    """
+    Manually trigger a check of bruktdel.no for a specific search or all active searches.
+    
+    Args:
+        search_name: Optional specific search to check. If None, checks all active searches.
+    
+    Returns:
+        Dictionary with check results
+    """
+    try:
+        from assist.tasks import check_bruktdel_searches, check_bruktdel_listing
+        
+        if search_name:
+            # Check a specific search
+            search = frappe.get_doc("Saved Marketplace Search", search_name)
+            
+            if search.marketplace != "bruktdel.no":
+                return {
+                    "success": False,
+                    "message": "Search is not for bruktdel.no marketplace"
+                }
+            
+            results_count = check_bruktdel_listing(
+                search_query=search.search_query,
+                asset_code=search.asset_code,
+                user=search.user
+            )
+            
+            # Update the search record
+            search.last_checked = frappe.utils.now()
+            search.results_found = results_count
+            search.save(ignore_permissions=True)
+            frappe.db.commit()
+            
+            return {
+                "success": True,
+                "search_name": search_name,
+                "results_found": results_count,
+                "message": f"Checked bruktdel.no: {results_count} results found"
+            }
+        else:
+            # Check all active searches
+            check_bruktdel_searches()
+            
+            return {
+                "success": True,
+                "message": "Triggered check for all active bruktdel.no searches"
+            }
+            
+    except Exception as e:
+        frappe.log_error(f"Trigger bruktdel.no check error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to trigger bruktdel.no check"
+        }
+def get_marketplace_hustle_status() -> Dict[str, Any]:
+    """
+    Get the current status of the marketplace hustle routine.
+    
+    Returns:
+        Dictionary with status information including active searches and recent activity
+    """
+    try:
+        from assist.utils.marketplace_hustle import get_hustle_routine_status
+        
+        result = get_hustle_routine_status()
+        return result
+    except Exception as e:
+        frappe.log_error(f"Get marketplace hustle status error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get marketplace hustle routine status"
+          
         }
