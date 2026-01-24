@@ -8,8 +8,10 @@ track marketplace searches, update prices, and check for new listings.
 import frappe
 from frappe import _
 from frappe.utils import now_datetime, add_days, get_datetime
-import requests
-from bs4 import BeautifulSoup
+
+# TODO: Uncomment when implementing actual web scraping
+# import requests
+# from bs4 import BeautifulSoup
 
 
 def check_bruktdel_searches():

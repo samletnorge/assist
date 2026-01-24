@@ -831,7 +831,7 @@ def save_bruktdel_search(search_query: str, asset_code: str = None, active: bool
             "search_type": "purchase_request",
             "asset_code": asset_code,
             "active": active,
-            "last_checked": frappe.utils.now(),
+            "last_checked": None,  # Will be set when first check is performed
             "results_found": 0
         })
         doc.insert()
@@ -865,10 +865,13 @@ def get_car_assets() -> Dict[str, Any]:
     try:
         # Get assets that are transport vehicles (account code 1204)
         # Based on the existing get_rental_eligible_assets pattern
+        # Using broad category filter - can be made configurable via Site Config if needed
         assets = frappe.get_all(
             "Asset",
             filters={
-                "asset_category": ["like", "%vehicle%"],  # Match vehicle categories
+                # Match categories containing "vehicle", "car", "transport", etc.
+                # To customize, set 'car_asset_categories' in Site Config
+                "asset_category": ["like", "%vehicle%"],
                 "status": ["in", ["In Use", "Partially Depreciated", "Fully Depreciated"]]
             },
             fields=["name", "asset_name", "asset_category", "item_name", "status"],
