@@ -5,5 +5,6 @@ rembg>=2.0.0
 pillow>=10.0.0
 
 # Optional dependencies for extended features
+bleach
 # Uncomment the following line to enable receipt OCR scanning
 # pytesseract>=0.3.10
