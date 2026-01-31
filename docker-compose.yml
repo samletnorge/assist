@@ -19,7 +19,7 @@ services:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
-      - ./nginx/frappe.conf:/etc/nginx/conf.d/frappe.conf
+      - ./frappe.conf:/etc/nginx/conf.d/frappe.conf
     depends_on:
       configurator:
         condition: service_completed_successfully
