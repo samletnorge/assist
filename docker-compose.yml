@@ -3,12 +3,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile   # Path to your Dockerfile
+      args:
+        PUBLIC_BACKEND_URL: http://backend:8000
     image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
       restart_policy:
         condition: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+      MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
