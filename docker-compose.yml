@@ -3,10 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile   # Path to your Dockerfile
-      args:
-        SITE_NAME: 5e5899d8398b5f7b
-        ADMIN_PASSWORD: rqiiifmbdbwcjjuceo2tilwecnkilnhx
-        DB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -14,15 +10,13 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-      SITE_NAME: 5e5899d8398b5f7b
-      ADMIN_PASSWORD: rqiiifmbdbwcjjuceo2tilwecnkilnhx
-      DB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
-
+      SITE_NAME: ${SITE_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
-      - ./frappe.conf:/etc/nginx/conf.d/frappe.conf
     depends_on:
       configurator:
         condition: service_completed_successfully
@@ -90,7 +84,10 @@ services:
     networks:
       - dokploy-network
     depends_on:
-      - websocket
+      websocket:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: on-failure
@@ -108,6 +105,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - ./frappe.conf:/etc/nginx/conf.d/frappe.conf
     expose:
       - "8080"
     ports:
