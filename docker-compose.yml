@@ -7,6 +7,8 @@ services:
         MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
         MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     image: custom-erpnext
+    ports:
+      - "8000:8000"
     networks:
       - dokploy-network
     deploy:
