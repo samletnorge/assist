@@ -4,8 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile   # Path to your Dockerfile
       args:
-        MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
-        MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+        SITE_NAME: 5e5899d8398b5f7b
+        ADMIN_PASSWORD: rqiiifmbdbwcjjuceo2tilwecnkilnhx
+        DB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -13,8 +14,10 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-      MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
-      MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+      SITE_NAME: 5e5899d8398b5f7b
+      ADMIN_PASSWORD: rqiiifmbdbwcjjuceo2tilwecnkilnhx
+      DB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
