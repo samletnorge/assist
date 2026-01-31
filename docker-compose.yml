@@ -4,7 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile   # Path to your Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://backend:8000
+        MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+        MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     image: custom-erpnext
     networks:
       - dokploy-network
