@@ -7,8 +7,6 @@ services:
         MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
         MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
     image: custom-erpnext
-    ports:
-      - "8000:8000"
     networks:
       - dokploy-network
     deploy:
@@ -21,6 +19,7 @@ services:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - ./nginx/frappe.conf:/etc/nginx/conf.d/frappe.conf
     depends_on:
       configurator:
         condition: service_completed_successfully
