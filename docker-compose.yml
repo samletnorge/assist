@@ -123,7 +123,7 @@ services:
     networks:
       - dokploy-network
     healthcheck:
-      test: mysqladmin ping -h localhost --password=xabwitljnq4azdrixcfhgbymja0d0rxm
+      test: mysqladmin ping -h localhost --password=admin
       interval: 1s
       retries: 20
     deploy:
