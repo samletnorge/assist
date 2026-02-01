@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SITE_NAME="5e5899d8398b5f7b"
+SITE_NAME="5b832ac7859aa86c"
 ASSIST_REPO="https://github.com/minfuel/assist.git"
 ASSIST_BRANCH="main"
 
