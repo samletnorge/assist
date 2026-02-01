@@ -12,7 +12,7 @@ services:
     environment:
       SITE_NAME: ${SITE_NAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_ROOT_PASSWORD: admin
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
@@ -123,7 +123,7 @@ services:
     networks:
       - dokploy-network
     healthcheck:
-      test: mysqladmin ping -h localhost --password=admin
+      test: mysqladmin ping -h localhost --password=${DB_ROOT_PASSWORD}
       interval: 1s
       retries: 20
     deploy:
@@ -135,8 +135,8 @@ services:
       - --skip-character-set-client-handshake
       - --skip-innodb-read-only-compressed
     environment:
-      MYSQL_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
-      MARIADB_ROOT_PASSWORD: xabwitljnq4azdrixcfhgbymja0d0rxm
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
    
