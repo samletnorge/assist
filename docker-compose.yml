@@ -12,7 +12,7 @@ services:
     environment:
       SITE_NAME: ${SITE_NAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_ROOT_PASSWORD: admin
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
