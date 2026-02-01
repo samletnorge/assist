@@ -28,6 +28,9 @@ services:
         condition: service_healthy
         
   configurator:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -58,6 +61,9 @@ services:
       - logs:/home/frappe/frappe-bench/logs
       
   create-site:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     deploy:
       mode: replicated
@@ -98,6 +104,9 @@ services:
       - dokploy-network
 
   migration:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     deploy:
       mode: replicated
@@ -141,6 +150,9 @@ services:
       - db-data:/var/lib/mysql
    
   frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -170,6 +182,9 @@ services:
       - 8080
 
   queue-long:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -189,6 +204,9 @@ services:
         condition: service_healthy
 
   queue-short:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -237,6 +255,9 @@ services:
         condition: on-failure
 
   scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
@@ -257,6 +278,9 @@ services:
         condition: service_healthy
 
   websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
     image: custom-erpnext
     networks:
       - dokploy-network
