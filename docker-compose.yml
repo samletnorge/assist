@@ -34,7 +34,10 @@ services:
         condition: service_healthy
         
   configurator:
-    <<: *custom_image
+    build:
+      context: .
+      dockerfile: Dockerfile   # Path to your Dockerfile
+    image: custom-erpnext
     networks:
       - dokploy-network
     deploy:
@@ -52,7 +55,6 @@ services:
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
-        bench get-app git clone https://github.com/samletnorge/assist.git --branch main -y
     environment:
       DB_HOST: db
       DB_PORT: "3306"
