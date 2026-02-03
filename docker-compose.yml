@@ -1,3 +1,9 @@
+x-custom-image: &custom_image
+  image: ${IMAGE_NAME}:${VERSION}
+  deploy:
+    restart_policy:
+      condition: always
+
 services:
   backend:
     build:
@@ -28,7 +34,7 @@ services:
         condition: service_healthy
         
   configurator:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     deploy:
@@ -58,7 +64,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
       
   create-site:
-    image: custom-erpnext
+    <<: *custom_image
     deploy:
       mode: replicated
       replicas: ${CREATE_SITE:-0}
@@ -98,7 +104,7 @@ services:
       - dokploy-network
 
   migration:
-    image: custom-erpnext
+    <<: *custom_image
     deploy:
       mode: replicated
       replicas: ${MIGRATE:-0}
@@ -141,7 +147,7 @@ services:
       - db-data:/var/lib/mysql
    
   frontend:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     depends_on:
@@ -170,7 +176,7 @@ services:
       - 8080
 
   queue-long:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     deploy:
@@ -189,7 +195,7 @@ services:
         condition: service_healthy
 
   queue-short:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     deploy:
@@ -237,7 +243,7 @@ services:
         condition: on-failure
 
   scheduler:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     deploy:
@@ -257,7 +263,7 @@ services:
         condition: service_healthy
 
   websocket:
-    image: custom-erpnext
+    <<: *custom_image
     networks:
       - dokploy-network
     deploy:
