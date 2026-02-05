@@ -158,7 +158,8 @@ scheduler_events = {
 	],
 	"daily": [
 		"assist.tasks.daily_marketplace_summary",
-    "assist.utils.marketplace_hustle.check_marketplace_searches"
+    "assist.utils.marketplace_hustle.check_marketplace_searches",
+    "assist.tasks.send_garden_reminders"
 	],
 }
 

@@ -30,6 +30,7 @@ Assist is a comprehensive Frappe/ERPNext app that extends your ERP system with A
 - 🤖 **AI Integration** - Full MCP server for AI model interaction
 - 📝 **Technical Standards** - RDS 81346 and S1000D documentation generation
 - 🔧 **DevOps Integration** - GitHub repository management as ERP assets
+- 🌱 **Farm Season Calendar** - Norwegian garden planner with companion planting, crop rotation, and harvest tracking
 
 ---
 
@@ -216,6 +217,60 @@ sequenceDiagram
   - Kommune newsletter tracking with highlighted news
   - Search and filter by entity type, provider, category
   - Detailed requirements and document lists
+
+### 🌱 Farm Season Calendar ⭐ NEW!
+
+Evidence-based garden planning system optimized for Norwegian climate zones:
+
+- **Norwegian Crop Database**
+  - 12+ pre-configured crops optimized for zones 1-8
+  - Planting and harvest windows for Norwegian seasons
+  - Days to maturity, frost tolerance, and spacing data
+  - Growing tips specific to Norwegian conditions
+
+- **Companion Planting**
+  - Built-in companion plant relationships
+  - Automatic warnings for incompatible crops
+  - Suggestions for beneficial plant combinations
+  - Based on scientific evidence and traditional knowledge
+
+- **Crop Rotation Planning**
+  - Track crop families to prevent soil disease
+  - Automatic rotation suggestions
+  - Multi-year planning support
+  - Link previous season schedules
+
+- **Succession Planting**
+  - Calculate optimal planting intervals
+  - Ensure continuous harvest throughout season
+  - Automatic date calculations based on maturity
+  - Maximize garden productivity
+
+- **Garden Plot Management**
+  - Define multiple garden areas
+  - Track soil type, pH, sun exposure
+  - Manage raised beds, greenhouses, polytunnels
+  - Calculate planting capacity
+
+- **Smart Reminders**
+  - Email notifications for planting dates
+  - Harvest reminders based on maturity
+  - Configurable reminder timing
+  - Daily automated checks
+
+- **Shopping Lists**
+  - Auto-generate seed/plant shopping lists
+  - Quantity calculations based on schedule
+  - Variety tracking
+  - Budget planning
+
+- **Weather Integration (yr.no)** ⭐ NEW!
+  - Real-time weather from Norwegian Meteorological Institute
+  - 7-day forecasts with temperature, precipitation, wind
+  - Frost risk alerts for crop protection
+  - Weather-based planting advice
+  - Crop-specific recommendations
+  - Automatic weather for garden plots
 
 ### 🤖 MCP Server (AI Integration)
 
@@ -479,6 +534,80 @@ POST /api/method/assist.api.get_kommune_newsletters
 {
     "kommune": "Oslo",
     "is_highlighted": true
+}
+```
+
+### Farm Season Calendar
+
+```python
+# Get planting calendar for specific zone/month
+POST /api/method/assist.api.get_planting_calendar
+{
+    "norwegian_zone": "3",
+    "month": "May"
+}
+
+# Get companion planting suggestions
+POST /api/method/assist.api.get_companion_planting_suggestions
+{
+    "crop_name": "Tomat (Tomato)"
+}
+
+# Get crop rotation suggestions
+POST /api/method/assist.api.get_crop_rotation_suggestions
+{
+    "garden_plot": "Main Garden",
+    "previous_crop": "Potet (Potato)"
+}
+
+# Calculate succession planting schedule
+POST /api/method/assist.api.calculate_succession_planting
+{
+    "crop_name": "Salat (Lettuce)",
+    "start_date": "2026-04-01",
+    "end_date": "2026-07-31"
+}
+
+# Generate shopping list from planting schedule
+POST /api/method/assist.api.generate_garden_shopping_list
+{
+    "schedule_name": "GPS-2026-00001"
+}
+
+# Get upcoming planting and harvest tasks
+POST /api/method/assist.api.get_upcoming_garden_tasks
+{
+    "days_ahead": 14
+}
+
+# Get weather forecast from yr.no
+POST /api/method/assist.api.get_weather_forecast_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "days": 7
+}
+
+# Check frost risk
+POST /api/method/assist.api.get_frost_risk_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522
+}
+
+# Get weather-based planting advice
+POST /api/method/assist.api.get_planting_weather_advice_for_location
+{
+    "latitude": 59.9139,
+    "longitude": 10.7522,
+    "crop_name": "Tomat (Tomato)"
+}
+
+# Get weather for garden plot
+POST /api/method/assist.api.get_weather_for_garden_plot
+{
+    "plot_name": "Main Garden",
+    "days": 7
 }
 ```
 
