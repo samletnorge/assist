@@ -15,10 +15,6 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    environment:
-      SITE_NAME: ${SITE_NAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
@@ -66,66 +62,7 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
       
-  create-site:
-    <<: *custom_image
-    deploy:
-      mode: replicated
-      replicas: ${CREATE_SITE:-0}
-      restart_policy:
-        condition: none
-    entrypoint: ["bash", "-c"]
-    command:
-      - >
-        wait-for-it -t 120 $$DB_HOST:$$DB_PORT;
-        wait-for-it -t 120 redis-cache:6379;
-        wait-for-it -t 120 redis-queue:6379;
-        export start=`date +%s`;
-        until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] && \
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]];
-        do
-          echo "Waiting for sites/common_site_config.json to be created";
-          sleep 5;
-          if (( `date +%s`-start > 120 )); then
-            echo "could not find sites/common_site_config.json with required keys";
-            exit 1
-          fi
-        done;
-        echo "sites/common_site_config.json found";
-        [[ -d "sites/${SITE_NAME}" ]] && echo "${SITE_NAME} already exists" && exit 0;
-        bench new-site --mariadb-user-host-login-scope='%' --admin-password=$${ADMIN_PASSWORD} --db-root-username=root --db-root-password=$${DB_ROOT_PASSWORD} $${INSTALL_APP_ARGS} $${SITE_NAME};
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    environment:
-      SITE_NAME: ${SITE_NAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: "${DB_PORT:-3306}"
-      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      INSTALL_APP_ARGS: ${INSTALL_APP_ARGS}
-    networks:
-      - dokploy-network
-
-  migration:
-    <<: *custom_image
-    deploy:
-      mode: replicated
-      replicas: ${MIGRATE:-0}
-      restart_policy:
-        condition: none
-    entrypoint: ["bash", "-c"]
-    command:
-      - >
-        curl -f http://${SITE_NAME}:8080/api/method/ping || echo "Site busy" && exit 0;
-        bench --site all set-config -p maintenance_mode 1;
-        bench --site all set-config -p pause_scheduler 1;
-        bench --site all migrate;
-        bench --site all set-config -p maintenance_mode 0;
-        bench --site all set-config -p pause_scheduler 0;
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - dokploy-network
+ 
       
   db:
     image: mariadb:10.6
