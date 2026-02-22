@@ -99,7 +99,7 @@ services:
       DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       INSTALL_APP_ARGS: ${INSTALL_APP_ARGS}
     networks:
-      - bench-network
+      - dokploy-network
       
  
       
