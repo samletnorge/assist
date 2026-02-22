@@ -61,6 +61,7 @@ services:
       - apps:/home/frappe/frappe-bench/apps
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      
   create-site:
     <<: *custom_image
     deploy:
@@ -102,28 +103,34 @@ services:
       - dokploy-network
       
  
-      
+   
+
   db:
-    image: mariadb:10.6
-    networks:
-      - dokploy-network
+    image: mariadb:latest
+    deploy:
+      mode: replicated
+      replicas: ${ENABLE_DB:-0}
+      restart_policy:
+        condition: always
     healthcheck:
       test: mysqladmin ping -h localhost --password=${DB_ROOT_PASSWORD}
       interval: 1s
       retries: 20
-    deploy:
-      restart_policy:
-        condition: on-failure
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
       - --skip-innodb-read-only-compressed
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
+    networks:
+      - dokploy-network
+
+
+      
    
   frontend:
     <<: *custom_image
