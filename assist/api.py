@@ -840,7 +840,10 @@ def generate_marketplace_route(
             "success": False,
             "error": str(e),
             "message": "Failed to generate marketplace route"
+        }
 
+
+@frappe.whitelist()
 def get_norwegian_support_programs(
     entity_type: str = None,
     provider: str = None,
@@ -965,6 +968,10 @@ def get_enova_support_programs(status: str = "Active") -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to retrieve Enova programs"
+        }
+
+
+@frappe.whitelist()
 def save_bruktdel_search(search_query: str, asset_code: str = None, active: bool = True) -> Dict[str, Any]:
     """
     Save a new bruktdel.no search for tracking car parts.
@@ -1102,7 +1109,10 @@ def auto_photoshoot_rental_item(
             "error": str(e),
             "message": "Failed to setup auto photoshoot"
         }
-ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
+
+
+@frappe.whitelist()
+def get_kommune_support_programs(kommune: str = None, status: str = "Active") -> Dict[str, Any]:
     """
     Get kommune (municipality) support programs.
     
@@ -1131,6 +1141,25 @@ ef get_kommune_support_programs(kommune: str = None, status: str = "Active") -> 
                 "eligible_for_housing", "eligible_for_farm"
             ],
             order_by="program_name"
+        )
+        
+        return {
+            "success": True,
+            "programs": programs,
+            "count": len(programs),
+            "kommune": kommune or "All",
+            "message": f"Found {len(programs)} kommune programs"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get kommune programs error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to retrieve kommune programs"
+        }
+
+
+@frappe.whitelist()
 def get_car_assets() -> Dict[str, Any]:
     """
     Get all car/vehicle assets from the system.
@@ -1154,21 +1183,11 @@ def get_car_assets() -> Dict[str, Any]:
                 "status": ["in", ["In Use", "Partially Depreciated", "Fully Depreciated"]]
             },
             fields=["name", "asset_name", "asset_category", "item_name", "status"],
-            order_by="asset_name asc")
+            order_by="asset_name asc"
+        )
         
         return {
             "success": True,
-            "programs": programs,
-            "count": len(programs),
-            "provider": "Kommune",
-            "message": f"Found {len(programs)} kommune support programs"
-        }
-    except Exception as e:
-        frappe.log_error(f"Get kommune programs error: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Failed to retrieve kommune programs"
             "assets": assets,
             "count": len(assets)
         }
@@ -1178,9 +1197,7 @@ def get_car_assets() -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to get car assets"
-        
         }
-        
 
 
 @frappe.whitelist()
@@ -1463,5 +1480,601 @@ def get_marketplace_hustle_status() -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Failed to get marketplace hustle routine status"
-          
+        }
+
+
+# ============================================================================
+# Farm Season Calendar API Endpoints
+# ============================================================================
+
+
+@frappe.whitelist()
+def get_planting_calendar(norwegian_zone: str = None, month: str = None) -> Dict[str, Any]:
+    """
+    Get planting calendar recommendations for Norwegian climate zones.
+    
+    Args:
+        norwegian_zone: Norwegian climate zone (1-8, or "All Zones")
+        month: Optional month to filter crops (e.g., "May")
+    
+    Returns:
+        Dictionary with list of crops suitable for planting
+    """
+    try:
+        filters = {}
+        
+        if norwegian_zone and norwegian_zone != "All Zones":
+            filters["norwegian_zone"] = ["in", [norwegian_zone, "All Zones"]]
+        
+        # Get all crops first, then filter by month in Python for proper month handling
+        crops = frappe.get_all(
+            "Crop",
+            filters=filters,
+            fields=[
+                "name", "crop_name", "crop_family", "crop_type", "norwegian_zone",
+                "planting_start_month", "planting_end_month", "harvest_start_month",
+                "harvest_end_month", "days_to_maturity", "succession_planting_interval_days",
+                "frost_tolerant", "sun_requirement", "water_requirement",
+                "spacing_between_plants_cm", "spacing_between_rows_cm", "good_companions",
+                "bad_companions"
+            ],
+            order_by="crop_name"
+        )
+        
+        # Filter by month if provided (using proper month ordering)
+        if month:
+            months = ["January", "February", "March", "April", "May", "June",
+                     "July", "August", "September", "October", "November", "December"]
+            try:
+                month_idx = months.index(month)
+                filtered_crops = []
+                for crop in crops:
+                    if crop.get("planting_start_month") and crop.get("planting_end_month"):
+                        start_idx = months.index(crop["planting_start_month"])
+                        end_idx = months.index(crop["planting_end_month"])
+                        # Handle year-spanning seasons
+                        if start_idx <= end_idx:
+                            # Normal season within same year
+                            if start_idx <= month_idx <= end_idx:
+                                filtered_crops.append(crop)
+                        else:
+                            # Season spans new year
+                            if month_idx >= start_idx or month_idx <= end_idx:
+                                filtered_crops.append(crop)
+                crops = filtered_crops
+            except ValueError:
+                pass  # Invalid month, return all crops
+        
+        return {
+            "success": True,
+            "crops": crops,
+            "count": len(crops),
+            "zone": norwegian_zone or "All Zones",
+            "month": month or "All Months",
+            "message": f"Found {len(crops)} crops for planting"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get planting calendar error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get planting calendar"
+        }
+
+
+@frappe.whitelist()
+def get_companion_planting_suggestions(crop_name: str) -> Dict[str, Any]:
+    """
+    Get companion planting suggestions for a specific crop.
+    
+    Args:
+        crop_name: Name of the crop to get companion suggestions for
+    
+    Returns:
+        Dictionary with good and bad companion plants
+    """
+    try:
+        crop = frappe.get_doc("Crop", crop_name)
+        
+        good_companions = []
+        if crop.good_companions:
+            companion_names = [c.strip() for c in crop.good_companions.split(',')]
+            for companion_name in companion_names:
+                # Try to find the crop
+                crops = frappe.get_all(
+                    "Crop",
+                    filters={"crop_name": ["like", f"%{companion_name}%"]},
+                    fields=["crop_name", "crop_family", "crop_type"],
+                    limit=1
+                )
+                if crops:
+                    good_companions.append(crops[0])
+                else:
+                    good_companions.append({"crop_name": companion_name, "crop_family": "", "crop_type": ""})
+        
+        bad_companions = []
+        if crop.bad_companions:
+            companion_names = [c.strip() for c in crop.bad_companions.split(',')]
+            for companion_name in companion_names:
+                crops = frappe.get_all(
+                    "Crop",
+                    filters={"crop_name": ["like", f"%{companion_name}%"]},
+                    fields=["crop_name", "crop_family", "crop_type"],
+                    limit=1
+                )
+                if crops:
+                    bad_companions.append(crops[0])
+                else:
+                    bad_companions.append({"crop_name": companion_name, "crop_family": "", "crop_type": ""})
+        
+        return {
+            "success": True,
+            "crop": crop_name,
+            "good_companions": good_companions,
+            "bad_companions": bad_companions,
+            "message": f"Found {len(good_companions)} good and {len(bad_companions)} bad companions"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get companion planting suggestions error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get companion planting suggestions"
+        }
+
+
+@frappe.whitelist()
+def get_crop_rotation_suggestions(garden_plot: str, previous_crop: str = None) -> Dict[str, Any]:
+    """
+    Get crop rotation suggestions based on previous crops in a garden plot.
+    
+    Args:
+        garden_plot: Name of the garden plot
+        previous_crop: Optional name of the crop previously planted
+    
+    Returns:
+        Dictionary with suggested crops for rotation
+    """
+    try:
+        suggestions = []
+        avoid_crops = []
+        
+        if previous_crop:
+            prev_crop_doc = frappe.get_doc("Crop", previous_crop)
+            prev_family = prev_crop_doc.crop_family
+            
+            # Get crops from different families for rotation
+            suggestions = frappe.get_all(
+                "Crop",
+                filters={
+                    "crop_family": ["!=", prev_family]
+                },
+                fields=[
+                    "crop_name", "crop_family", "crop_type", "planting_start_month",
+                    "planting_end_month", "days_to_maturity"
+                ],
+                order_by="crop_name",
+                limit=20
+            )
+            
+            # Get crops from same family to avoid
+            avoid_crops = frappe.get_all(
+                "Crop",
+                filters={
+                    "crop_family": prev_family,
+                    "crop_name": ["!=", previous_crop]
+                },
+                fields=["crop_name", "crop_family"],
+                order_by="crop_name"
+            )
+        else:
+            # No previous crop, suggest all crops
+            suggestions = frappe.get_all(
+                "Crop",
+                fields=[
+                    "crop_name", "crop_family", "crop_type", "planting_start_month",
+                    "planting_end_month", "days_to_maturity"
+                ],
+                order_by="crop_name",
+                limit=20
+            )
+        
+        return {
+            "success": True,
+            "garden_plot": garden_plot,
+            "previous_crop": previous_crop or "None",
+            "suggested_crops": suggestions,
+            "avoid_crops": avoid_crops,
+            "rotation_tip": "Rotate crops from different families to prevent soil-borne diseases and pest buildup.",
+            "message": f"Found {len(suggestions)} suggested crops for rotation"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get crop rotation suggestions error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get crop rotation suggestions"
+        }
+
+
+@frappe.whitelist()
+def calculate_succession_planting(crop_name: str, start_date: str, end_date: str) -> Dict[str, Any]:
+    """
+    Calculate succession planting schedule for continuous harvest.
+    
+    Args:
+        crop_name: Name of the crop
+        start_date: Start date for planting (YYYY-MM-DD)
+        end_date: End date for planting (YYYY-MM-DD)
+    
+    Returns:
+        Dictionary with succession planting schedule
+    """
+    try:
+        from datetime import datetime, timedelta
+        from frappe.utils import getdate, add_days
+        
+        crop = frappe.get_doc("Crop", crop_name)
+        
+        if not crop.succession_planting_interval_days or crop.succession_planting_interval_days == 0:
+            return {
+                "success": False,
+                "message": f"{crop_name} is not suitable for succession planting"
+            }
+        
+        start = getdate(start_date)
+        end = getdate(end_date)
+        
+        schedule = []
+        current_date = start
+        planting_number = 1
+        
+        while current_date <= end:
+            harvest_date = add_days(current_date, crop.days_to_maturity) if crop.days_to_maturity else None
+            
+            schedule.append({
+                "planting_number": planting_number,
+                "planting_date": str(current_date),
+                "expected_harvest_date": str(harvest_date) if harvest_date else "Unknown",
+                "days_to_maturity": crop.days_to_maturity or 0
+            })
+            
+            current_date = add_days(current_date, crop.succession_planting_interval_days)
+            planting_number += 1
+        
+        return {
+            "success": True,
+            "crop": crop_name,
+            "succession_interval_days": crop.succession_planting_interval_days,
+            "planting_schedule": schedule,
+            "total_plantings": len(schedule),
+            "message": f"Created succession planting schedule with {len(schedule)} plantings"
+        }
+    except Exception as e:
+        frappe.log_error(f"Calculate succession planting error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to calculate succession planting schedule"
+        }
+
+
+@frappe.whitelist()
+def generate_garden_shopping_list(schedule_name: str) -> Dict[str, Any]:
+    """
+    Generate a shopping list for a garden planting schedule.
+    
+    Args:
+        schedule_name: Name of the Garden Planting Schedule
+    
+    Returns:
+        Dictionary with shopping list items
+    """
+    try:
+        schedule = frappe.get_doc("Garden Planting Schedule", schedule_name)
+        
+        shopping_list = {}
+        
+        for item in schedule.planting_items:
+            crop_key = item.crop
+            if item.variety:
+                crop_key = f"{item.crop} ({item.variety})"
+            
+            if crop_key not in shopping_list:
+                shopping_list[crop_key] = {
+                    "crop": item.crop,
+                    "variety": item.variety or "Standard",
+                    "total_quantity": 0,
+                    "planting_dates": []
+                }
+            
+            shopping_list[crop_key]["total_quantity"] += item.quantity or 1
+            shopping_list[crop_key]["planting_dates"].append(str(item.planting_date))
+        
+        shopping_items = list(shopping_list.values())
+        
+        return {
+            "success": True,
+            "schedule_name": schedule_name,
+            "garden_plot": schedule.garden_plot,
+            "year": schedule.year,
+            "shopping_list": shopping_items,
+            "total_crop_types": len(shopping_items),
+            "message": f"Generated shopping list with {len(shopping_items)} items"
+        }
+    except Exception as e:
+        frappe.log_error(f"Generate shopping list error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to generate shopping list"
+        }
+
+
+@frappe.whitelist()
+def get_upcoming_garden_tasks(days_ahead: int = 14) -> Dict[str, Any]:
+    """
+    Get upcoming planting and harvest tasks.
+    
+    Args:
+        days_ahead: Number of days to look ahead (default: 14)
+    
+    Returns:
+        Dictionary with upcoming tasks
+    """
+    try:
+        from frappe.utils import getdate, add_days
+        
+        today = getdate()
+        future_date = add_days(today, days_ahead)
+        
+        # Get all active planting schedules
+        schedules = frappe.get_all(
+            "Garden Planting Schedule",
+            fields=["name", "schedule_name", "garden_plot", "year"]
+        )
+        
+        tasks = {
+            "planting": [],
+            "harvest": []
+        }
+        
+        for schedule_info in schedules:
+            schedule = frappe.get_doc("Garden Planting Schedule", schedule_info["name"])
+            
+            for item in schedule.planting_items:
+                # Check planting tasks
+                if item.planting_date and item.status == "Planned":
+                    planting_date = getdate(item.planting_date)
+                    if today <= planting_date <= future_date:
+                        days_until = (planting_date - today).days
+                        tasks["planting"].append({
+                            "schedule": schedule.schedule_name,
+                            "garden_plot": schedule.garden_plot,
+                            "crop": item.crop,
+                            "variety": item.variety,
+                            "date": str(item.planting_date),
+                            "days_until": days_until,
+                            "quantity": item.quantity
+                        })
+                
+                # Check harvest tasks
+                if item.expected_harvest_date and item.status in ["Seeded/Planted", "Growing"]:
+                    harvest_date = getdate(item.expected_harvest_date)
+                    if today <= harvest_date <= future_date:
+                        days_until = (harvest_date - today).days
+                        tasks["harvest"].append({
+                            "schedule": schedule.schedule_name,
+                            "garden_plot": schedule.garden_plot,
+                            "crop": item.crop,
+                            "variety": item.variety,
+                            "date": str(item.expected_harvest_date),
+                            "days_until": days_until,
+                            "quantity": item.quantity
+                        })
+        
+        # Sort by date
+        tasks["planting"].sort(key=lambda x: x["date"])
+        tasks["harvest"].sort(key=lambda x: x["date"])
+        
+        return {
+            "success": True,
+            "days_ahead": days_ahead,
+            "planting_tasks": tasks["planting"],
+            "harvest_tasks": tasks["harvest"],
+            "total_tasks": len(tasks["planting"]) + len(tasks["harvest"]),
+            "message": f"Found {len(tasks['planting'])} planting and {len(tasks['harvest'])} harvest tasks"
+        }
+    except Exception as e:
+        frappe.log_error(f"Get upcoming garden tasks error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get upcoming garden tasks"
+        }
+
+
+# ============================================================================
+# Weather Integration (yr.no) API Endpoints
+# ============================================================================
+
+
+@frappe.whitelist()
+def get_weather_forecast_for_location(latitude: float, longitude: float, days: int = 7) -> Dict[str, Any]:
+    """
+    Get weather forecast from yr.no for a specific location.
+    
+    Args:
+        latitude: Latitude coordinate (e.g., 59.9139 for Oslo)
+        longitude: Longitude coordinate (e.g., 10.7522 for Oslo)
+        days: Number of days to forecast (default: 7, max: 10)
+    
+    Returns:
+        Dictionary with weather forecast data from Norwegian Meteorological Institute
+    """
+    try:
+        from assist.utils.weather_yr import get_weather_forecast
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        days = int(days)
+        
+        if days < 1 or days > 10:
+            return {
+                "success": False,
+                "error": "Days must be between 1 and 10",
+                "message": "Invalid days parameter"
+            }
+        
+        result = get_weather_forecast(latitude, longitude, days)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid latitude or longitude"
+        }
+    except Exception as e:
+        frappe.log_error(f"Weather forecast error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get weather forecast"
+        }
+
+
+@frappe.whitelist()
+def get_frost_risk_for_location(latitude: float, longitude: float) -> Dict[str, Any]:
+    """
+    Check for frost risk in the upcoming days.
+    
+    Args:
+        latitude: Latitude coordinate
+        longitude: Longitude coordinate
+    
+    Returns:
+        Dictionary with frost risk assessment for the next 7 days
+    """
+    try:
+        from assist.utils.weather_yr import get_frost_risk
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        
+        result = get_frost_risk(latitude, longitude)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid latitude or longitude"
+        }
+    except Exception as e:
+        frappe.log_error(f"Frost risk check error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to check frost risk"
+        }
+
+
+@frappe.whitelist()
+def get_planting_weather_advice_for_location(
+    latitude: float, 
+    longitude: float, 
+    crop_name: str = None
+) -> Dict[str, Any]:
+    """
+    Get weather-based planting advice for a location.
+    
+    Args:
+        latitude: Latitude coordinate
+        longitude: Longitude coordinate
+        crop_name: Optional crop name for crop-specific advice
+    
+    Returns:
+        Dictionary with planting advice based on current weather conditions
+    """
+    try:
+        from assist.utils.weather_yr import get_planting_weather_advice
+        
+        latitude = float(latitude)
+        longitude = float(longitude)
+        
+        result = get_planting_weather_advice(latitude, longitude, crop_name)
+        return result
+        
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Invalid parameters"
+        }
+    except Exception as e:
+        frappe.log_error(f"Planting weather advice error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get planting advice"
+        }
+
+
+@frappe.whitelist()
+def get_weather_for_garden_plot(plot_name: str, days: int = 7) -> Dict[str, Any]:
+    """
+    Get weather forecast for a garden plot's location.
+    
+    Args:
+        plot_name: Name of the Garden Plot
+        days: Number of days to forecast (default: 7)
+    
+    Returns:
+        Dictionary with weather forecast for the plot's location
+    """
+    try:
+        plot = frappe.get_doc("Garden Plot", plot_name)
+        
+        # Parse location string (must be in format "Lat,Lon")
+        location = plot.location
+        
+        if not location:
+            return {
+                "success": False,
+                "message": "Garden plot has no location set"
+            }
+        
+        # Parse as coordinates
+        if ',' in location:
+            parts = location.split(',')
+            if len(parts) == 2:
+                try:
+                    latitude = float(parts[0].strip())
+                    longitude = float(parts[1].strip())
+                    
+                    from assist.utils.weather_yr import get_weather_forecast
+                    result = get_weather_forecast(latitude, longitude, int(days))
+                    result["garden_plot"] = plot_name
+                    return result
+                except ValueError:
+                    pass
+        
+        # If not coordinates, suggest using coordinates
+        return {
+            "success": False,
+            "message": f"Garden plot location '{location}' should be in 'latitude,longitude' format (e.g., '59.9139,10.7522' for Oslo). Please update the Garden Plot location field."
+        }
+        
+    except frappe.DoesNotExistError:
+        return {
+            "success": False,
+            "message": f"Garden Plot '{plot_name}' not found"
+        }
+    except Exception as e:
+        frappe.log_error(f"Weather for garden plot error: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get weather for garden plot"
         }
